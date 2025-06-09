@@ -487,5 +487,11 @@ function renderFavoriteMatches() {
         }
         document.addEventListener('DOMContentLoaded', initializePage);
     </script>
+    <script>
+        // Fonksiyonları global scope'a ekle
+        window.loginWithGoogle = loginWithGoogle;
+        window.loginWithWallet = loginWithWallet;
+        window.logout = logout;
+    </script>
 </body>
 </html>
