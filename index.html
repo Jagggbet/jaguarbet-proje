@@ -24,7 +24,8 @@
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: end; }
         .form-group { display: flex; flex-direction: column; }
         .form-group label { margin-bottom: 0.4rem; font-weight: 500; font-size: 0.85rem; color: var(--text-muted-color); }
-        .form-group select, .form-group input, input[type="date"] { padding: 0.7rem 0.8rem; background-color: var(--surface-highlight-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; font-family: inherit; font-size: 0.9rem; width: 100%; }
+        .form-group select, .form-group input, input[type="date"] { padding: 0.7rem 0.8rem; background-color: var(--surface-highlight-color); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 5px; font-family: inherit; font-size: 0.9rem; width: 100%; -webkit-appearance: none; }
+        .form-group input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
         .card button:hover, .form-group button:hover { background-color: var(--primary-hover-color); }
         .league-group-header { display: flex; align-items: center; padding: 0.7rem 1rem; background-color: var(--surface-highlight-color); border-radius: 6px 6px 0 0; margin-top: 1.2rem; border-bottom: 1px solid var(--border-color); }
         .league-group-header:first-child { margin-top: 0; }
@@ -34,24 +35,24 @@
         .match-row { display: flex; align-items: center; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); background-color: var(--surface-color); transition: background-color 0.2s ease; position: relative; overflow: hidden; }
         .league-matches .match-row:last-child { border-bottom: none; border-radius: 0 0 6px 6px; }
         .match-row:hover { background-color: var(--surface-highlight-color); }
-        .match-status { font-size: 0.85rem; color: var(--text-muted-color); font-weight: 700; width: 40px; text-align: center; margin-right: 0.8rem; }
+        .match-status { font-size: 0.85rem; color: var(--text-muted-color); font-weight: 500; width: 50px; text-align: center; margin-right: 0.8rem; flex-shrink: 0;}
         .match-teams { flex-grow: 1; margin-right: 0.8rem; }
-        .team-line { display: flex; align-items: center; margin-bottom: 0.3rem; position: relative; }
+        .team-line { display: flex; align-items: center; margin-bottom: 0.3rem; }
         .team-line:last-child { margin-bottom: 0; }
         .team-logo { width: 18px; height: 18px; margin-right: 8px; object-fit: contain; }
         .team-name { font-size: 0.9rem; color: var(--text-color); }
-        .match-scores { display: flex; flex-direction: column; align-items: center; width: 25px; }
-        .score-value { font-size: 1rem; font-weight: 700; color: var(--text-color); }
+        .match-scores { display: flex; flex-direction: column; align-items: center; width: 25px; font-weight: 700; }
+        .score-value { font-size: 1rem; color: var(--text-color); }
         .favorite-toggle { cursor: pointer; font-size: 1.4rem; line-height: 1; color: #555; transition: color 0.2s, transform 0.2s; margin-left: 1rem; padding: 5px; user-select: none; }
         .favorite-toggle:hover { transform: scale(1.2); }
         .favorite-toggle.is-favorite { color: var(--favorite-color); }
         .favorite-toggle.favorite-animate { animation: favorite-pop 0.3s ease-in-out; }
         @keyframes favorite-pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
-        #favorite-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--surface-color); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 8px; padding: 12px 32px; font-size: 1rem; z-index: 3000; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; opacity: 0; transition: opacity 0.3s; }
+        #favorite-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: var(--surface-color); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 8px; padding: 12px 32px; font-size: 1rem; z-index: 3000; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; opacity: 0; transition: opacity 0.3s; }
         #loading-indicator, .content-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.85); color: var(--primary-color); padding: 20px 30px; border-radius: 10px; font-size: 1rem; z-index: 2000; display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; }
         .content-loader { position: static; transform: none; background: transparent; padding: 2rem; }
         .loader { border: 4px solid #f3f3f330; border-radius: 50%; border-top: 4px solid var(--primary-color); width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 0 auto 8px auto; }
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
         th, td { text-align: left; padding: 0.8rem; border-bottom: 1px solid var(--border-color); }
         th { background-color: var(--surface-highlight-color); font-weight: 700; color: var(--primary-color); }
@@ -191,11 +192,7 @@
                 </div>
                 <div class="table-responsive">
                     <table id="standings-table" style="display:none">
-                        <thead>
-                            <tr>
-                                <th style="width:40px">#</th><th style="text-align:left">Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>AV</th><th>P</th><th>Form</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th style="width:40px">#</th><th style="text-align:left">Takım</th><th>O</th><th>G</th><th>B</th><th>M</th><th>AG</th><th>YG</th><th>AV</th><th>P</th><th>Form</th></tr></thead>
                         <tbody></tbody>
                     </table>
                 </div>
@@ -209,9 +206,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
     <script>
-        const BACKEND_API_BASE = '/api/football'; // GÜNCELLENDİ: API path'i daha temiz hale getirildi
+        const API_BASE_AUTH = '/api/auth';
+        const API_BASE_FOOTBALL = '/api/football';
+        const API_BASE_NOTIFICATIONS = '/api/notifications';
+        const API_BASE_CONFIG = '/api/config';
+        
         let FCM_VAPID_PUBLIC_KEY = null;
-
         let userDbFavorites = new Set();
         let currentUser = null;
         let allMatchesData = {};
@@ -244,7 +244,7 @@
             if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
             return response.json();
         };
-
+        
         // --- RENDER FONKSİYONLARI ---
         const createLeagueHeaderElement = (league) => `
             <div class="league-group-header">
@@ -257,14 +257,15 @@
 
         const createFixtureRowElement = (match) => {
             const { fixture, teams, goals } = match;
-            allMatchesData[fixture.id] = match; // Tüm maçları merkezi bir yerde sakla
+            allMatchesData[fixture.id] = match;
             const favorites = getCurrentFavorites();
             
             let statusText;
             const shortStatus = fixture.status.short;
-            if (['FT', 'AET', 'PEN', 'CANC', 'ABD', 'PST'].includes(shortStatus)) {
-                const statusMap = {'FT':'Bitti', 'AET':'Bitti (UZT)', 'PEN':'Bitti (PEN)', 'CANC':'İptal', 'ABD':'Terk Edildi', 'PST':'Ertelendi'};
-                statusText = statusMap[shortStatus] || shortStatus;
+            const statusMap = {'FT':'Bitti', 'AET':'Bitti (UZT)', 'PEN':'Bitti (PEN)', 'CANC':'İptal', 'ABD':'Terk Edildi', 'PST':'Ertelendi'};
+
+            if (statusMap[shortStatus]) {
+                statusText = statusMap[shortStatus];
             } else if (fixture.status.elapsed) {
                 statusText = `<span style="color:var(--live-text-color);">${fixture.status.elapsed}'</span>`;
             } else {
@@ -275,8 +276,8 @@
                 <div class="match-row" id="match-${fixture.id}">
                     <div class="match-status">${statusText}</div>
                     <div class="match-teams">
-                        <div class="team-line"><img src="${teams.home.logo}" class="team-logo">${teams.home.name}</div>
-                        <div class="team-line"><img src="${teams.away.logo}" class="team-logo">${teams.away.name}</div>
+                        <div class="team-line"><img src="${teams.home.logo}" class="team-logo" alt="${teams.home.name}">${teams.home.name}</div>
+                        <div class="team-line"><img src="${teams.away.logo}" class="team-logo" alt="${teams.away.name}">${teams.away.name}</div>
                     </div>
                     <div class="match-scores">
                         <div class="score-value">${goals.home ?? '-'}</div>
@@ -291,10 +292,10 @@
                 'live': 'Şu anda canlı maç bulunmuyor.',
                 'scheduled': 'Seçilen tarihte oynanacak maç bulunamadı.',
                 'finished': 'Seçilen tarihte bitmiş maç bulunamadı.',
-                'favorites': 'Favori maçlarınız şu an canlı değil veya veri yüklenemedi.'
+                'favorites': 'Favori maç bulunamadı veya verileri henüz yüklenmedi.'
             };
             if (!matches || matches.length === 0) {
-                displayMessage(container.id, messageMap[type]);
+                displayMessage(container.id, messageMap[type] || 'Veri bulunamadı.');
                 return;
             }
 
@@ -303,9 +304,9 @@
                 return acc;
             }, {});
             
+            const sortedLeagueIds = Object.keys(groupedByLeague).sort((a,b) => (groupedByLeague[a][0].league.name || '').localeCompare(groupedByLeague[b][0].league.name || ''));
+            
             let html = '';
-            const sortedLeagueIds = Object.keys(groupedByLeague).sort((a,b) => groupedByLeague[a][0].league.name.localeCompare(groupedByLeague[b][0].league.name));
-
             for (const leagueId of sortedLeagueIds) {
                 const leagueMatches = groupedByLeague[leagueId].sort((a,b) => new Date(a.fixture.date) - new Date(b.fixture.date));
                 html += createLeagueHeaderElement(leagueMatches[0].league);
@@ -318,9 +319,9 @@
         const fetchLiveMatches = async (isUpdate = false) => {
             if (!isUpdate) showLoading();
             try {
-                const data = await fetchDataFromBackend(`${BACKEND_API_BASE}/fixtures?live=all`);
+                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixtures?live=all`);
                 renderFixtures(document.getElementById('live-matches-container'), data.response, 'live');
-                renderFavoriteMatches(); // Canlı maçlar güncellendiğinde favorileri de güncelle
+                renderFavoriteMatches();
             } catch (error) {
                 console.error("Canlı maçlar çekilirken hata oluştu:", error);
                 displayMessage('live-matches-container', 'Canlı maçlar yüklenirken bir sorun oluştu.', true);
@@ -340,10 +341,13 @@
             }
             container.innerHTML = `<div class="content-loader"><div class="loader"></div>Veriler Yükleniyor...</div>`;
             try {
-                const data = await fetchDataFromBackend(`${BACKEND_API_BASE}/fixtures?date=${date}`);
+                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixtures?date=${date}`);
+                
+                const finishedStatus = ['FT', 'AET', 'PEN', 'CANC', 'ABD', 'PST', 'AWD', 'WO'];
                 const matches = (type === 'finished')
-                    ? data.response.filter(m => ['FT', 'AET', 'PEN', 'CANC', 'ABD', 'PST'].includes(m.fixture.status.short))
-                    : data.response.filter(m => !['FT', 'AET', 'PEN', 'CANC', 'ABD', 'PST'].includes(m.fixture.status.short));
+                    ? data.response.filter(m => finishedStatus.includes(m.fixture.status.short))
+                    : data.response.filter(m => !finishedStatus.includes(m.fixture.status.short));
+                
                 renderFixtures(container, matches, type);
             } catch (error) {
                 console.error(`${type} maçları çekilirken hata:`, error);
@@ -363,49 +367,337 @@
         };
 
         // --- AUTH & FAVORITES & NOTIFICATIONS ---
-        // Bu fonksiyonlar önceki halinden büyük oranda aynı kalacak
-        const loginWithGoogle = () => { window.location.href = `/api/auth/google`; };
-        // loginWithWallet, logout, checkForLoggedInUser, loadUserFavorites, saveFavorites, toggleFavorite...
-        // showFavoriteAlert, updateAllFavoriteIcons, ve bildirim fonksiyonları...
-        // PUAN DURUMU FONKSİYONLARI (loadLeagues, loadSeasons, fetchStandings)
-        // Hepsi burada yer almalı...
+        const loginWithGoogle = () => { window.location.href = `${API_BASE_AUTH}/google`; };
+
+        const loginWithWallet = async () => {
+            const msg = document.getElementById('login-message');
+            msg.textContent = '';
+            try {
+                if (typeof window.ethereum === 'undefined') throw new Error('Lütfen MetaMask gibi bir cüzdan kurun.');
+                showLoading();
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                const { nonce } = await fetchDataFromBackend(`${API_BASE_AUTH}/nonce`);
+                const message = `Giriş yapmak için bu mesajı imzalayın. Nonce: ${nonce}`;
+                const signature = await signer.signMessage(message);
+                const { token } = await fetchDataFromBackend(`${API_BASE_AUTH}/web3-verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, signature, address }),
+                });
+                localStorage.setItem('user_token', token);
+                await checkForLoggedInUser();
+            } catch (error) {
+                msg.textContent = `Hata: ${error.message}`;
+                msg.style.color = 'var(--danger-color)';
+            } finally {
+                hideLoading();
+            }
+        };
+
+        const logout = () => {
+            localStorage.removeItem('user_token');
+            currentUser = null;
+            userDbFavorites.clear();
+            updateUI();
+            updateAllFavoriteIcons();
+            renderFavoriteMatches();
+        };
+
+        const checkForLoggedInUser = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+            if (tokenFromUrl) {
+                localStorage.setItem('user_token', tokenFromUrl);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            const storedToken = localStorage.getItem('user_token');
+            if (storedToken) {
+                const userData = parseJwt(storedToken);
+                if (userData && userData.exp * 1000 > Date.now()) {
+                    currentUser = userData;
+                } else {
+                    logout();
+                }
+            }
+            updateUI();
+            if (currentUser) {
+                await loadUserFavorites();
+                const guestFavorites = getGuestFavorites();
+                if (guestFavorites.size > 0) {
+                    const mergedFavorites = new Set([...guestFavorites, ...userDbFavorites]);
+                    if (mergedFavorites.size > userDbFavorites.size) {
+                        userDbFavorites = new Set(Array.from(mergedFavorites));
+                        await saveFavorites();
+                    }
+                    localStorage.removeItem('guest_favorites');
+                }
+                updateNotificationSwitch();
+            }
+            updateAllFavoriteIcons();
+            renderFavoriteMatches();
+        };
+
+        const updateUI = () => {
+            const authSection = document.getElementById('auth-section');
+            const profileSection = document.getElementById('profile-section');
+            if (currentUser) {
+                authSection.style.display = 'none';
+                profileSection.style.display = 'block';
+                const profileName = currentUser.name || (currentUser.address ? 'Cüzdan Kullanıcısı' : 'Kullanıcı');
+                document.getElementById('profile-name').textContent = profileName.split(' ')[0];
+                document.getElementById('menu-user-name').textContent = profileName;
+                document.getElementById('menu-user-email').textContent = currentUser.email || 'E-posta bilgisi yok';
+                const walletContainer = document.getElementById('menu-wallet-address-container');
+                if (currentUser.address) {
+                    walletContainer.style.display = 'flex';
+                    document.getElementById('menu-wallet-address').textContent = `${currentUser.address.slice(0, 6)}...${currentUser.address.slice(-4)}`;
+                } else {
+                    walletContainer.style.display = 'none';
+                }
+            } else {
+                authSection.style.display = 'block';
+                profileSection.style.display = 'none';
+            }
+        };
+
+        const toggleProfileMenu = () => {
+            const menu = document.getElementById('profile-menu');
+            const button = document.getElementById('profile-button');
+            const isVisible = menu.style.display === 'block';
+            menu.style.display = isVisible ? 'none' : 'block';
+            button.classList.toggle('open', !isVisible);
+        };
+        
+        const loadUserFavorites = async () => {
+            const token = localStorage.getItem('user_token');
+            if (!token) return;
+            try {
+                const favs = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/get-favorites`, { headers: { 'Authorization': `Bearer ${token}` } });
+                userDbFavorites = new Set(favs.map(Number));
+            } catch (error) { console.error('Favoriler yüklenirken hata:', error); }
+        };
+
+        const saveFavorites = async () => {
+            if (!currentUser) return;
+            const token = localStorage.getItem('user_token');
+            try {
+                await fetchDataFromBackend(`${API_BASE_FOOTBALL}/set-favorites`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(Array.from(userDbFavorites))
+                });
+            } catch (error) { console.error('Favoriler kaydedilirken hata:', error); }
+        };
+
+        const toggleFavorite = (fixtureIdStr, event) => {
+            event.stopPropagation();
+            const fixtureId = parseInt(fixtureIdStr, 10);
+            const icon = event.target;
+            const favorites = getCurrentFavorites();
+            if (favorites.has(fixtureId)) {
+                favorites.delete(fixtureId);
+            } else {
+                favorites.add(fixtureId);
+                icon.classList.add('favorite-animate');
+                setTimeout(() => icon.classList.remove('favorite-animate'), 300);
+            }
+            if (currentUser) saveFavorites();
+            else saveGuestFavorites(favorites);
+            updateAllFavoriteIcons();
+            renderFavoriteMatches();
+        };
+
+        const showFavoriteAlert = (msg) => {
+            const alertDiv = document.getElementById('favorite-alert');
+            alertDiv.textContent = msg;
+            alertDiv.style.display = 'block';
+            setTimeout(() => alertDiv.style.opacity = 1, 10);
+            setTimeout(() => {
+                alertDiv.style.opacity = 0;
+                setTimeout(() => alertDiv.style.display = 'none', 300);
+            }, 2000);
+        };
+
+        const updateAllFavoriteIcons = () => {
+            const favorites = getCurrentFavorites();
+            document.querySelectorAll('.favorite-toggle').forEach(icon => {
+                const fixtureId = parseInt(icon.dataset.fixtureId, 10);
+                icon.classList.toggle('is-favorite', favorites.has(fixtureId));
+            });
+        };
+
+        const handleNotificationSwitch = async () => {
+            const isChecked = document.getElementById('notification-switch').checked;
+            try {
+                if (isChecked) await subscribeUserToPush();
+                else await unsubscribeUserFromPush();
+            } catch (error) {
+                console.error('Bildirim anahtarı hatası:', error);
+                document.getElementById('notification-switch').checked = !isChecked;
+                showFavoriteAlert('Bildirim ayarı değiştirilemedi.');
+            }
+        };
+
+        const updateNotificationSwitch = async () => {
+            const item = document.getElementById('notification-item');
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !FCM_VAPID_PUBLIC_KEY) {
+                item.style.display = 'none';
+                return;
+            }
+            item.style.display = 'flex';
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                document.getElementById('notification-switch').checked = subscription !== null;
+            } catch (e) {
+                console.error("Service worker hazır değil, bildirim durumu kontrol edilemedi.");
+                item.style.display = 'none';
+            }
+        };
+
+        const subscribeUserToPush = async () => {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') throw new Error('Bildirim izni verilmedi.');
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(FCM_VAPID_PUBLIC_KEY),
+            });
+            await fetchDataFromBackend(`${API_BASE_NOTIFICATIONS}/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('user_token')}` },
+                body: JSON.stringify(subscription),
+            });
+            showFavoriteAlert('Bildirimler açıldı!');
+        };
+        
+        const unsubscribeUserFromPush = async () => {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+                await fetchDataFromBackend(`${API_BASE_NOTIFICATIONS}/unsubscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('user_token')}` },
+                    body: JSON.stringify({ endpoint: subscription.endpoint }),
+                });
+                await subscription.unsubscribe();
+                showFavoriteAlert('Bildirimler kapatıldı.');
+            }
+        };
+        
+        // --- PUAN DURUMU ---
+        const loadLeagues = async () => {
+            try {
+                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/leagues`);
+                const leagues = data.response.filter(l => l.league.type === 'League').sort((a, b) => a.country.name.localeCompare(b.country.name) || a.league.name.localeCompare(b.league.name));
+                const select = document.getElementById('league-select');
+                select.innerHTML = '<option value="">Lig seçin...</option>';
+                leagues.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.league.id;
+                    option.textContent = `${item.country.name} - ${item.league.name}`;
+                    select.appendChild(option);
+                });
+            } catch (error) { console.error('Ligler yüklenirken hata:', error); }
+        };
+
+        const loadSeasons = async () => {
+            try {
+                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/seasons`);
+                const select = document.getElementById('season-select');
+                select.innerHTML = '<option value="">Sezon seçin...</option>';
+                data.response.sort((a, b) => b - a).forEach(season => {
+                    const option = new Option(season, season);
+                    select.appendChild(option);
+                });
+            } catch (error) { console.error('Sezonlar yüklenirken hata:', error); }
+        };
+
+        const fetchStandings = async () => {
+            const leagueId = document.getElementById('league-select').value;
+            const season = document.getElementById('season-select').value;
+            if (!leagueId || !season) {
+                displayMessage('standings-message', 'Lütfen lig ve sezon seçin');
+                return;
+            }
+            showLoading();
+            try {
+                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/standings?league=${leagueId}&season=${season}`);
+                const standings = data.response[0]?.league?.standings?.[0];
+                if (!standings) {
+                    displayMessage('standings-message', 'Bu lig/sezon için puan durumu verisi bulunamadı.');
+                    document.getElementById('standings-table').style.display = 'none';
+                    return;
+                }
+                const tbody = document.querySelector('#standings-table tbody');
+                tbody.innerHTML = standings.map(team => `
+                    <tr>
+                        <td style="text-align:center">${team.rank}</td>
+                        <td style="white-space:nowrap"><img src="${team.team.logo}" alt="">${team.team.name}</td>
+                        <td style="text-align:center">${team.all.played}</td>
+                        <td style="text-align:center">${team.all.win}</td>
+                        <td style="text-align:center">${team.all.draw}</td>
+                        <td style="text-align:center">${team.all.lose}</td>
+                        <td style="text-align:center">${team.all.goals.for}</td>
+                        <td style="text-align:center">${team.all.goals.against}</td>
+                        <td style="text-align:center">${team.goalsDiff}</td>
+                        <td style="text-align:center;font-weight:bold">${team.points}</td>
+                        <td style="min-width:90px">${(team.form || '').split('').map(r => `<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:${r === 'W' ? '#4CAF50' : r === 'D' ? '#FFC107' : '#F44336'};color:white;font-size:10px;margin:0 1px;">${r}</span>`).join('')}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('standings-message').style.display = 'none';
+                document.getElementById('standings-table').style.display = 'table';
+            } catch (error) {
+                console.error('Puan durumu yüklenirken hata:', error);
+                displayMessage('standings-message', 'Puan durumu yüklenemedi.', true);
+            } finally {
+                hideLoading();
+            }
+        };
 
         // --- SAYFA BAŞLATMA ---
         const openTab = (event) => {
             const tabName = event.currentTarget.dataset.tab;
-            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(tb => tb.classList.remove('active'));
+            document.querySelectorAll('.tab-content, .tab-button').forEach(el => el.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             event.currentTarget.classList.add('active');
-
-            if (tabName === 'favorites-tab') {
-                renderFavoriteMatches();
-            }
+            if (tabName === 'favorites-tab') renderFavoriteMatches();
         };
 
         const initializePage = async () => {
             if ('serviceWorker' in navigator) {
                 try {
                     await navigator.serviceWorker.register('/service-worker.js');
-                } catch(err) {
-                    console.error('Service Worker kaydı başarısız:', err);
-                }
+                } catch(err) { console.error('Service Worker kaydı başarısız:', err); }
             }
             
+            document.getElementById('google-login-btn').addEventListener('click', loginWithGoogle);
+            document.getElementById('wallet-login-btn').addEventListener('click', loginWithWallet);
+            document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+            document.getElementById('profile-button').addEventListener('click', toggleProfileMenu);
             document.querySelectorAll('.tab-button').forEach(button => button.addEventListener('click', openTab));
-            // Diğer event listener'lar (login, logout, profil vs.) burada ayarlanmalı
+            document.getElementById('notification-switch').addEventListener('change', handleNotificationSwitch);
+            window.addEventListener('click', (event) => {
+                if (!event.target.closest('#profile-section')) {
+                    const menu = document.getElementById('profile-menu');
+                    if (menu && menu.style.display === 'block') toggleProfileMenu();
+                }
+            });
 
-            // Tarih seçicilere varsayılan tarihleri ata
             const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
             const yesterday = new Date(today);
             yesterday.setDate(yesterday.getDate() - 1);
-            
             document.getElementById('scheduled-date-select').value = today.toISOString().split('T')[0];
             document.getElementById('finished-date-select').value = yesterday.toISOString().split('T')[0];
             
-            // await loadConfig(); // VAPID key için
+            try {
+                const config = await fetchDataFromBackend(API_BASE_CONFIG);
+                FCM_VAPID_PUBLIC_KEY = config.vapidPublicKey;
+            } catch(e) { console.error('Yapılandırma yüklenemedi', e); }
+
             await checkForLoggedInUser();
             await fetchLiveMatches();
             await loadLeagues();
@@ -414,9 +706,6 @@
             liveMatchIntervalId = setInterval(() => fetchLiveMatches(true), 120000);
         };
         
-        // Bu alana, yukarıda belirtilen ama yer kaplamaması için eklenmeyen
-        // tüm Auth, Favorites, Notifications ve Standings fonksiyonlarını
-        // önceki kodunuzdan kopyalayıp yapıştırmanız gerekmektedir.
         document.addEventListener('DOMContentLoaded', initializePage);
     </script>
 </body>
