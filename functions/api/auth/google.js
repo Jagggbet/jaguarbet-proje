@@ -20,7 +20,7 @@ export async function onRequestGet(context) {
     authUrl.searchParams.set('scope', 'openid email profile');
     authUrl.searchParams.set('state', state); // Güvenlik için state parametresi eklendi
     authUrl.searchParams.set('access_type', 'offline'); // Refresh token almak için (opsiyonel ama iyi bir pratik)
-    authUrl.searchParams.set('prompt', 'consent'); // Kullanıcının her seferinde onay vermesini sağlar
+    
 
     // Tarayıcıyı Google'ın giriş sayfasına yönlendir
     return Response.redirect(authUrl.toString(), 302);
