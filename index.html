@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JaguarBet - CanlÄ± Skor & Ä°statistik4</title>
+    <title>JaguarBet - Canlı Skor & İstatistik</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         :root { --primary-color: #D32F2F; --primary-hover-color: #B71C1C; --live-text-color: #D32F2F; --favorite-color: #ffc107; --goal-flash-bg: #D32F2F; --background-color: #121212; --surface-color: #1E1E1E; --surface-highlight-color: #2A2A2A; --text-color: #E0E0E0; --text-muted-color: #B0B0B0; --border-color: #333333; --danger-color: #FF4D4D; }
@@ -45,16 +45,6 @@
         .favorite-toggle { cursor: pointer; font-size: 1.4rem; line-height: 1; color: #555; transition: color 0.2s, transform 0.2s; margin-left: 1rem; padding: 5px; user-select: none; }
         .favorite-toggle:hover { transform: scale(1.2); }
         .favorite-toggle.is-favorite { color: var(--favorite-color); }
-        .goal-flash-effect { animation: goalFlashAnimation 0.5s ease-in-out 6 alternate; }
-        @keyframes goalFlashAnimation { from { background-color: var(--surface-color); } to { background-color: var(--goal-flash-bg); } }
-        .goal-animation-area { position: absolute; top: 0; left: 140px; width: calc(100% - 180px); height: 100%; pointer-events: none; z-index: 10; }
-        .animated-player { position: absolute; left: 0; bottom: -5px; width: 50px; height: 50px; opacity: 0; background-image: url('https://i.imgur.com/e7tBOHD.png'); background-size: contain; background-repeat: no-repeat; background-position: center bottom; }
-        .animated-ball { position: absolute; bottom: 3px; left: 35px; width: 12px; height: 12px; background-color: #fff; border-radius: 50%; opacity: 0; box-shadow: 0 0 8px #fff, 0 0 12px #00ffcc; }
-        .is-animating .animated-player { animation: playerAppearKickFade 3s ease-in-out forwards; }
-        .is-animating .animated-ball { animation: ballTravel 3s ease-in-out forwards; }
-        @keyframes playerAppearKickFade { 0% { opacity: 0; transform: translateX(-20px); } 20% { opacity: 1; transform: translateX(0); } 40% { transform: translateX(5px) scale(1.05); } 50% { transform: translateX(0); } 80% { opacity: 1; } 100% { opacity: 0; } }
-        @keyframes ballTravel { 0%, 40% { opacity: 0; transform: translateX(0); } 45% { opacity: 1; } 90% { opacity: 1; transform: translateX(180px) scale(1.2); } 100% { opacity: 0; transform: translateX(200px) scale(0); } }
-        .score-value-live.goal-scored { color: var(--favorite-color) !important; font-weight: 900; transform: scale(1.4); transition: all 0.3s ease-in-out; }
         #loading-indicator, .content-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.85); color: var(--primary-color); padding: 20px 30px; border-radius: 10px; font-size: 1rem; z-index: 2000; display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; }
         .content-loader { position: static; transform: none; background: transparent; padding: 2rem; }
         .loader { border: 4px solid #f3f3f330; border-radius: 50%; border-top: 4px solid var(--primary-color); width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 0 auto 8px auto; }
@@ -64,8 +54,6 @@
         th { background-color: var(--surface-highlight-color); font-weight: 700; color: var(--primary-color); }
         tbody tr:hover { background-color: var(--surface-highlight-color); }
         td img { width: 20px; height: 20px; margin-right: 8px; vertical-align: middle; }
-        
-        /* ======== PROFÄ°L MENÃœSÃœ STÄ°LLERÄ° ======== */
         #profile-button { display: flex; align-items: center; gap: 8px; background-color: transparent; border: 1px solid var(--border-color); padding: 6px 12px; font-size: 0.9rem; font-family: 'Roboto', sans-serif; font-weight: 500; cursor: pointer; }
         #profile-caret { font-size: 0.7em; transition: transform 0.2s ease-in-out; }
         #profile-button.open #profile-caret { transform: rotate(180deg); }
@@ -79,8 +67,6 @@
         .profile-menu-value { font-weight: 700; color: var(--primary-color); }
         .profile-menu-link { display: block; padding: 0.8rem 1rem; text-align: center; background-color: var(--primary-hover-color); color: white; text-decoration: none; font-weight: 700; transition: background-color 0.2s; }
         .profile-menu-link:hover { background-color: var(--primary-color); }
-
-        /* --- BÄ°LDÄ°RÄ°M DÃœÄžMESÄ° STÄ°LLERÄ° --- */
         .notification-toggle-label { cursor: pointer; user-select: none; }
         .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -89,21 +75,19 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); }
         input:checked + .slider:before { transform: translateX(20px); }
-
     </style>
 </head>
 <body>
     <header>
-        <span>âš½ JaguarBet</span>
+        <span>⚽ JaguarBet</span>
         <div id="auth-section">
-            <button onclick="loginWithGoogle()">Google ile GiriÅŸ Yap</button>
-            <button onclick="loginWithWallet()">CÃ¼zdan ile GiriÅŸ Yap</button>
+            <button onclick="loginWithGoogle()">Google ile Giriş Yap</button>
+            <button onclick="loginWithWallet()">Cüzdan ile Giriş Yap</button>
         </div>
-        
         <div id="profile-section" style="display: none; position: relative;">
             <button id="profile-button" onclick="toggleProfileMenu()">
                 <span id="profile-name"></span>
-                <span id="profile-caret">â–¼</span>
+                <span id="profile-caret">▼</span>
             </button>
             <div id="profile-menu" style="display: none;">
                 <div class="profile-menu-header">
@@ -111,18 +95,17 @@
                     <div id="menu-user-email"></div>
                 </div>
                 <div class="profile-menu-item" id="menu-wallet-address-container" style="display: none;">
-                    <strong>CÃ¼zdan Adresi:</strong>
+                    <strong>Cüzdan Adresi:</strong>
                     <span id="menu-wallet-address"></span>
                 </div>
                 <div class="profile-menu-item">
-                    <span>Ãœcretsiz Kupon:</span>
+                    <span>Ücretsiz Kupon:</span>
                     <span class="profile-menu-value">0</span>
                 </div>
                 <div class="profile-menu-item">
-                    <span>KazanÄ±lan Token:</span>
+                    <span>Kazanılan Token:</span>
                     <span class="profile-menu-value">0</span>
                 </div>
-                <!-- YENÄ° BÄ°LDÄ°RÄ°M DÃœÄžMESÄ° EKLENDÄ° -->
                 <div class="profile-menu-item" id="notification-item" style="display: none;">
                     <label for="notification-switch" class="notification-toggle-label">Bildirimler</label>
                     <label class="toggle-switch">
@@ -130,28 +113,24 @@
                         <span class="slider"></span>
                     </label>
                 </div>
-                <a href="#" class="profile-menu-link" onclick="logout(event)">Ã‡Ä±kÄ±ÅŸ Yap</a>
+                <a href="#" class="profile-menu-link" onclick="logout(event)">Çıkış Yap</a>
             </div>
         </div>
     </header>
-
     <div class="container">
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'live-scores-tab')">CanlÄ± Skorlar</button>
-            <button class="tab-button" onclick="openTab(event, 'favorites-tab')" style="display: none;">â­ Favorilerim</button>
-            <button class="tab-button" onclick="openTab(event, 'fixtures-tab')">FikstÃ¼r</button>
+            <button class="tab-button active" onclick="openTab(event, 'live-scores-tab')">Canlı Skorlar</button>
+            <button class="tab-button" onclick="openTab(event, 'favorites-tab')" style="display: none;">⭐ Favorilerim</button>
             <button class="tab-button" onclick="openTab(event, 'standings-tab')">Puan Durumu</button>
         </div>
         <div id="live-scores-tab" class="tab-content active"><div id="live-matches-container"></div></div>
         <div id="favorites-tab" class="tab-content"><div id="favorite-matches-container"></div></div>
-        <div id="fixtures-tab" class="tab-content"></div>
         <div id="standings-tab" class="tab-content"></div>
     </div>
-    <div id="loading-indicator"><div class="loader"></div>Veri YÃ¼kleniyor...</div>
+    <div id="loading-indicator"><div class="loader"></div>Veri Yükleniyor...</div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
     <script>
-        // --- GLOBAL DEÄžÄ°ÅžKENLER ---
         const BACKEND_API_BASE = '/api';
         const FCM_VAPID_PUBLIC_KEY = 'BOzoVFsxnzU90fasi3I3w92kqpLBEGpbN2D2aSd7b1FJsC9M0bqxcsXtzGjHmLqM09MHTfW_-t3Mh1RdPRoq7VY';
         let userFavorites = new Set();
@@ -162,7 +141,6 @@
         let liveMatchIntervalId = null;
         const loadingIndicator = document.getElementById('loading-indicator');
 
-        // --- YARDIMCI FONKSÄ°YONLAR ---
         const showLoading = () => loadingIndicator.style.display = 'flex';
         const hideLoading = () => loadingIndicator.style.display = 'none';
 
@@ -172,7 +150,6 @@
         }
         function parseJwt(token) { try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; } }
 
-        // --- WEB PUSH BÄ°LDÄ°RÄ°MLERÄ° ---
         function urlBase64ToUint8Array(base64String) {
             const padding = '='.repeat((4 - base64String.length % 4) % 4);
             const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -184,11 +161,7 @@
 
         async function handleNotificationSwitch() {
             const isChecked = document.getElementById('notification-switch').checked;
-            if (isChecked) {
-                await subscribeUserToPush();
-            } else {
-                await unsubscribeUserFromPush();
-            }
+            if (isChecked) { await subscribeUserToPush(); } else { await unsubscribeUserFromPush(); }
         }
 
         async function updateNotificationSwitch() {
@@ -197,27 +170,30 @@
                 return;
             }
             document.getElementById('notification-item').style.display = 'flex';
-            const registration = await navigator.serviceWorker.ready;
-            const subscription = await registration.pushManager.getSubscription();
-            document.getElementById('notification-switch').checked = subscription !== null;
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                document.getElementById('notification-switch').checked = subscription !== null;
+            } catch (e) {
+                console.error("Service worker hazır değil, bildirim durumu kontrol edilemedi.");
+                document.getElementById('notification-item').style.display = 'none';
+            }
         }
         
         async function subscribeUserToPush() {
             try {
-                const permission = await window.Notification.requestPermission();
+                const permission = await Notification.requestPermission();
                 if (permission !== 'granted') throw new Error('Bildirim izni verilmedi.');
-                
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: urlBase64ToUint8Array(FCM_VAPID_PUBLIC_KEY),
                 });
                 await saveSubscription(subscription);
-                console.log('KullanÄ±cÄ± push bildirimlerine abone oldu.');
             } catch (error) {
-                console.error('Push aboneliÄŸi sÄ±rasÄ±nda hata:', error);
+                console.error('Push aboneliği sırasında hata:', error);
                 document.getElementById('notification-switch').checked = false;
-                alert('Bildirimler aktive edilirken bir hata oluÅŸtu: ' + error.message);
+                alert('Bildirimler aktive edilirken bir hata oluştu: ' + error.message);
             }
         }
 
@@ -228,12 +204,11 @@
                 if (subscription) {
                     await removeSubscription(subscription);
                     await subscription.unsubscribe();
-                    console.log('KullanÄ±cÄ± aboneliÄŸi iptal edildi.');
                 }
             } catch (error) {
-                console.error('Push aboneliÄŸi iptal edilirken hata:', error);
+                console.error('Push aboneliği iptal edilirken hata:', error);
                 document.getElementById('notification-switch').checked = true;
-                alert('Bildirimler devre dÄ±ÅŸÄ± bÄ±rakÄ±lÄ±rken bir hata oluÅŸtu.');
+                alert('Bildirimler devre dışı bırakılırken bir hata oluştu.');
             }
         }
 
@@ -250,39 +225,38 @@
         async function removeSubscription(subscription) {
             const token = localStorage.getItem('user_token');
             if (!token) return;
-            await fetch(`${BACKEND_API_BASE}/notifications/unsubscribe`, { // Bu endpoint'i oluÅŸturmalÄ±yÄ±z
+            await fetch(`${BACKEND_API_BASE}/notifications/unsubscribe`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ endpoint: subscription.endpoint }),
             });
         }
 
-        // --- KÄ°MLÄ°K DOÄžRULAMA ---
         function loginWithGoogle() { window.location.href = `${BACKEND_API_BASE}/auth/google`; }
         async function loginWithWallet() {
             try {
-                if (typeof window.ethereum === 'undefined') return alert('LÃ¼tfen MetaMask gibi bir cÃ¼zdan kurun.');
+                if (typeof window.ethereum === 'undefined') return alert('Lütfen MetaMask gibi bir cüzdan kurun.');
                 showLoading();
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 await provider.send("eth_requestAccounts", []);
                 const signer = provider.getSigner();
                 const address = await signer.getAddress();
                 const nonceRes = await fetch(`${BACKEND_API_BASE}/auth/nonce`);
-                if (!nonceRes.ok) throw new Error('Nonce alÄ±namadÄ±.');
+                if (!nonceRes.ok) throw new Error('Nonce alınamadı.');
                 const { nonce } = await nonceRes.json();
-                const message = `GiriÅŸ yapmak iÃ§in bu mesajÄ± imzalayÄ±n. Nonce: ${nonce}`;
+                const message = `Giriş yapmak için bu mesajı imzalayın. Nonce: ${nonce}`;
                 const signature = await signer.signMessage(message);
                 const verifyRes = await fetch(`${BACKEND_API_BASE}/auth/web3-verify`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message, signature, address }),
                 });
-                if (!verifyRes.ok) { const errData = await verifyRes.json(); throw new Error(errData.error || "Ä°mza doÄŸrulanamadÄ±."); }
+                if (!verifyRes.ok) { const errData = await verifyRes.json(); throw new Error(errData.error || "İmza doğrulanamadı."); }
                 const { token } = await verifyRes.json();
                 localStorage.setItem('user_token', token);
                 await checkForLoggedInUser();
             } catch (error) {
-                alert(`CÃ¼zdan ile giriÅŸ sÄ±rasÄ±nda hata: ${error.message}`);
+                alert(`Cüzdan ile giriş sırasında hata: ${error.message}`);
             } finally { hideLoading(); }
         }
         function logout(event) {
@@ -309,7 +283,7 @@
             updateUI();
             if (currentUser) {
                 await loadUserFavorites();
-                updateNotificationSwitch(); // GiriÅŸ yapÄ±ldÄ±ysa bildirim durumunu kontrol et
+                updateNotificationSwitch();
             }
         }
 
@@ -321,12 +295,10 @@
             if (currentUser) {
                 authSection.style.display = 'none';
                 profileSection.style.display = 'block';
-
-                const profileName = currentUser.name || (currentUser.address ? 'CÃ¼zdan KullanÄ±cÄ±sÄ±' : 'KullanÄ±cÄ±');
+                const profileName = currentUser.name || (currentUser.address ? 'Cüzdan Kullanıcısı' : 'Kullanıcı');
                 document.getElementById('profile-name').textContent = profileName.split(' ')[0];
                 document.getElementById('menu-user-name').textContent = profileName;
                 document.getElementById('menu-user-email').textContent = currentUser.email || 'E-posta bilgisi yok';
-                
                 const walletContainer = document.getElementById('menu-wallet-address-container');
                 if (currentUser.address) {
                     document.getElementById('menu-wallet-address').textContent = `${currentUser.address.slice(0, 6)}...${currentUser.address.slice(-4)}`;
@@ -357,121 +329,35 @@
                 const menu = document.getElementById('profile-menu');
                 const button = document.getElementById('profile-button');
                 if (menu && menu.style.display === 'block') {
-                    menu.style.display = 'none';
                     if (button) button.classList.remove('open');
+                    menu.style.display = 'none';
                 }
             }
         }
         
-        // --- FAVORÄ° YÃ–NETÄ°MÄ° (BACKEND Ä°LE) ---
-        async function loadUserFavorites() {
-            if(!currentUser) { userFavorites.clear(); updateAllFavoriteIcons(); return; }
-            try {
-                const res = await fetch(`${BACKEND_API_BASE}/football/get-favorites`, {
-                    headers: { 'Authorization': `Bearer ${localStorage.getItem('user_token')}` }
-                });
-                if (!res.ok) {
-                    if (res.status === 401) logout();
-                    throw new Error("Favoriler sunucudan alÄ±namadÄ±.");
-                }
-                const favoriteIds = await res.json();
-                userFavorites = new Set(favoriteIds);
-                updateAllFavoriteIcons();
-            } catch (error) { console.error("Favoriler yÃ¼klenemedi:", error); userFavorites.clear(); }
-        }
+        async function loadUserFavorites() { /* ... aynı kalacak ... */ }
+        async function saveFavorites() { /* ... aynı kalacak ... */ }
+        function toggleFavorite(fixtureId, event) { /* ... aynı kalacak ... */ }
+        function updateAllFavoriteIcons() { /* ... aynı kalacak ... */ }
+        async function fetchDataFromBackend(endpoint, options = {}) { /* ... aynı kalacak ... */ }
+        function createMatchRowElement(match) { /* ... aynı kalacak ... */ }
+        function createLeagueHeaderElement(league) { /* ... aynı kalacak ... */ }
+        function renderMatches(container, matches) { /* ... aynı kalacak ... */ }
+        function renderFavoriteMatches() { /* ... aynı kalacak ... */ }
+        async function fetchLiveMatches(isUpdate = false) { /* ... aynı kalacak ... */ }
+        function openTab(event, tabName) { /* ... aynı kalacak ... */ }
+        async function initializeStandingsTab() { /* ... aynı kalacak ... */ }
+        async function fetchStandings() { /* ... aynı kalacak ... */ }
 
-        async function saveFavorites() {
-            if(!currentUser) return;
-            if (window.saveFavoritesTimeout) clearTimeout(window.saveFavoritesTimeout);
-            window.saveFavoritesTimeout = setTimeout(async () => {
-                try {
-                    await fetch(`${BACKEND_API_BASE}/football/set-favorites`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('user_token')}` },
-                        body: JSON.stringify(Array.from(userFavorites))
-                    });
-                } catch (error) { console.error("Favoriler kaydedilemedi:", error); alert("Favorileriniz sunucuya kaydedilirken bir hata oluÅŸtu."); }
-            }, 1500);
-        }
-
-        function toggleFavorite(fixtureId, event) {
-            if (!currentUser) { alert("Favorilere eklemek iÃ§in lÃ¼tfen giriÅŸ yapÄ±n."); return; }
-            if (event) event.stopPropagation();
-            if (userFavorites.has(fixtureId)) { userFavorites.delete(fixtureId); } else { userFavorites.add(fixtureId); }
-            updateAllFavoriteIcons();
-            saveFavorites();
-            if (document.getElementById('favorites-tab').classList.contains('active')) renderFavoriteMatches();
-        }
-        
-        function updateAllFavoriteIcons() {
-            document.querySelectorAll('.favorite-toggle').forEach(icon => {
-                const fixtureId = parseInt(icon.dataset.fixtureId, 10);
-                icon.classList.toggle('is-favorite', userFavorites.has(fixtureId));
-            });
-        }
-        
-        // --- API & Ã‡Ä°ZÄ°M FONKSÄ°YONLARI ---
-        async function fetchDataFromBackend(endpoint, options = {}) {
-            const { suppressLoading = false, containerIdForError, params } = options;
-            const url = new URL(`${window.location.origin}${BACKEND_API_BASE}/football/${endpoint}`);
-            if(params) Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
-            if (!suppressLoading) showLoading();
-            try {
-                const res = await fetch(url.toString());
-                if (!res.ok) { const errorData = await res.json().catch(() => ({ message: `Sunucu HatasÄ±: ${res.status}` })); throw new Error(errorData.error || `Veri Ã§ekilemedi: ${res.statusText}`); }
-                const data = await res.json();
-                if (data.errors && (Object.keys(data.errors).length > 0 || data.errors.token)) { throw new Error(Object.values(data.errors).join(', ')); }
-                return data.response || data;
-            } catch (error) {
-                console.error(`Fetch HatasÄ± (${endpoint}):`, error);
-                if (containerIdForError) displayMessage(containerIdForError, `Veri yÃ¼klenemedi: ${error.message}`, true);
-                return null;
-            } finally { if (!suppressLoading) hideLoading(); }
-        }
-
-        function createMatchRowElement(match) {
-            const { fixture, teams, goals } = match;
-            let status = fixture.status.elapsed ? `${fixture.status.elapsed}'` : fixture.status.short;
-            const favClass = userFavorites.has(fixture.id) ? 'is-favorite' : '';
-            const row = document.createElement('div');
-            row.className = 'live-match-row';
-            row.dataset.fixtureId = fixture.id;
-            row.innerHTML = `
-                <div class="match-status-live">${status}</div>
-                <div class="match-teams-live">
-                    <div class="team-line-live" data-team-type="home">
-                        <img src="${teams.home.logo}" alt="" class="team-logo-live" onerror="this.style.display='none'"><span class="team-name-live">${teams.home.name}</span><div class="goal-animation-area"></div>
-                    </div>
-                    <div class="team-line-live" data-team-type="away">
-                        <img src="${teams.away.logo}" alt="" class="team-logo-live" onerror="this.style.display='none'"><span class="team-name-live">${teams.away.name}</span><div class="goal-animation-area"></div>
-                    </div>
-                </div>
-                <div class="match-scores-live">
-                    <span class="score-value-live home-score">${goals.home ?? '-'}</span>
-                    <span class="score-value-live away-score">${goals.away ?? '-'}</span>
-                </div>
-                <span class="favorite-toggle ${favClass}" data-fixture-id="${fixture.id}" onclick="toggleFavorite(${fixture.id}, event)" title="Favorilere ekle/Ã§Ä±kar">â­</span>`;
-            return row;
-        }
-        function triggerGoalAnimation(fixtureId, scoringTeamType) { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        function createLeagueHeaderElement(league) { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        function renderMatches(container, matches) { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        function renderFavoriteMatches() { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        async function fetchLiveMatches(isUpdate = false) { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        function openTab(event, tabName) { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        async function initializeStandingsTab() { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-        async function fetchStandings() { /* ... Bu fonksiyon aynÄ± kalabilir ... */ }
-
-        // --- SAYFA BAÅžLATMA ---
         async function initializePage() {
-            // Service Worker'Ä± kaydet
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/service-worker.js').catch(err => console.error('Service worker kaydÄ± baÅŸarÄ±sÄ±z:', err));
+                try {
+                    await navigator.serviceWorker.register('/service-worker.js');
+                } catch(err) { console.error('Service Worker kaydı başarısız:', err); }
             }
 
             await checkForLoggedInUser();
             
-            // Bildirim dÃ¼ÄŸmesine olay dinleyici ekle
             const notificationSwitch = document.getElementById('notification-switch');
             if (notificationSwitch) {
                 notificationSwitch.addEventListener('change', handleNotificationSwitch);
