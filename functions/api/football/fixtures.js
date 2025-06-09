@@ -7,12 +7,11 @@ export async function onRequestGet(context) {
 
     const url = new URL(context.request.url);
     const date = url.searchParams.get('date');
-    const live = url.searchParams.get('live'); // Canlı maçlar için
+    const live = url.searchParams.get('live');
     
-    // API için temel URL'yi oluştur
     let apiUrl = 'https://v3.football.api-sports.io/fixtures';
     let params = new URLSearchParams();
-    let cacheDuration = 86400; // Varsayılan önbellek süresi: 1 gün
+    let cacheDuration = 86400; // Varsayılan: 1 gün
 
     if (live === 'all') {
         params.set('live', 'all');
@@ -20,7 +19,6 @@ export async function onRequestGet(context) {
     } else if (date) {
         params.set('date', date);
         const today = new Date().toISOString().split('T')[0];
-        // Eğer istenen tarih bugünden eskiyse, önbellek süresini uzun tut
         if (date < today) {
             cacheDuration = 604800; // Geçmiş maçlar için 1 hafta
         } else {
@@ -30,10 +28,8 @@ export async function onRequestGet(context) {
         return new Response(JSON.stringify({ error: "Geçerli bir parametre (date veya live) gerekli." }), { status: 400 });
     }
 
-    // Parametreleri URL'ye ekle
     apiUrl = `${apiUrl}?${params.toString()}`;
 
-    // Önbellekleme (Caching)
     const cache = caches.default;
     const cacheKey = new Request(apiUrl);
     
@@ -48,7 +44,8 @@ export async function onRequestGet(context) {
         });
 
         if (!response.ok) {
-            throw new Error(`API hatası: ${response.status}`);
+            const errorText = await response.text();
+            throw new Error(`API hatası: ${response.status} - ${errorText}`);
         }
         
         const cacheableResponse = new Response(response.body, response);
