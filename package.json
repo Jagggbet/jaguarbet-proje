@@ -1,0 +1,15 @@
+{
+  "name": "jaguarbet-final",
+  "version": "1.0.0",
+  "description": "JaguarBet Projesi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jagggbet",
+  "license": "ISC",
+  "dependencies": {
+    "@tsndr/cloudflare-worker-jwt": "^2.5.2",
+    "ethers": "5.7.2"
+  }
+}
