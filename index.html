@@ -131,7 +131,51 @@
         </div>
         <div id="live-scores-tab" class="tab-content active"><div id="live-matches-container"></div></div>
         <div id="favorites-tab" class="tab-content"><div id="favorite-matches-container"></div></div>
-        <div id="standings-tab" class="tab-content"></div>
+        <div id="standings-tab" class="tab-content">
+            <div class="card">
+                <div class="card-header">Puan Durumu</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="league-select">Lig</label>
+                        <select id="league-select">
+                            <option value="">Lig seçin...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="season-select">Sezon</label>
+                        <select id="season-select">
+                            <option value="">Sezon seçin...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button onclick="fetchStandings()">Göster</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="standings-table" style="display:none">
+                        <thead>
+                            <tr>
+                                <th style="width:40px">#</th>
+                                <th style="text-align:left">Takım</th>
+                                <th>O</th>
+                                <th>G</th>
+                                <th>B</th>
+                                <th>M</th>
+                                <th>AG</th>
+                                <th>YG</th>
+                                <th>AV</th>
+                                <th>P</th>
+                                <th>Form</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div id="standings-message" class="content-loader">
+                    <div>Lütfen lig ve sezon seçin</div>
+                </div>
+            </div>
+        </div>
     </div>
     <div id="loading-indicator"><div class="loader"></div>Veri Yükleniyor...</div>
     <div id="favorite-alert"></div>
@@ -515,9 +559,127 @@
             }
         };
 
+        // Ligleri yükle
+        const loadLeagues = async () => {
+            try {
+                const data = await fetchDataFromBackend('/football/leagues');
+                if (!data.response || !Array.isArray(data.response)) throw new Error('Invalid leagues data');
+                
+                const leagues = data.response
+                    .filter(league => league.type === 'League') // Sadece normal ligleri göster
+                    .sort((a, b) => {
+                        if (a.country.name === b.country.name) return a.league.name.localeCompare(b.league.name);
+                        return a.country.name.localeCompare(b.country.name);
+                    });
+                
+                const select = document.getElementById('league-select');
+                select.innerHTML = '<option value="">Lig seçin...</option>';
+                
+                let currentCountry = '';
+                leagues.forEach(item => {
+                    if (currentCountry !== item.country.name) {
+                        currentCountry = item.country.name;
+                        const optgroup = document.createElement('optgroup');
+                        optgroup.label = currentCountry;
+                        select.appendChild(optgroup);
+                    }
+                    const option = document.createElement('option');
+                    option.value = item.league.id;
+                    option.textContent = item.league.name;
+                    select.lastChild.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Ligler yüklenirken hata:', error);
+                displayMessage('standings-message', 'Ligler yüklenemedi.', true);
+            }
+        };
+
+        // Sezonları yükle
+        const loadSeasons = async () => {
+            try {
+                const data = await fetchDataFromBackend('/football/seasons');
+                if (!data.response || !Array.isArray(data.response)) throw new Error('Invalid seasons data');
+                
+                const select = document.getElementById('season-select');
+                select.innerHTML = '<option value="">Sezon seçin...</option>';
+                
+                data.response.sort((a, b) => b - a).forEach(season => {
+                    const option = document.createElement('option');
+                    option.value = season;
+                    option.textContent = season;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Sezonlar yüklenirken hata:', error);
+                displayMessage('standings-message', 'Sezonlar yüklenemedi.', true);
+            }
+        };
+
         const fetchStandings = async () => {
-            // Standings tabı için kod buraya eklenecek
-            displayMessage('standings-tab', 'Puan durumu özelliği yakında eklenecektir.');
+            const leagueId = document.getElementById('league-select').value;
+            const season = document.getElementById('season-select').value;
+            
+            if (!leagueId || !season) {
+                displayMessage('standings-message', 'Lütfen lig ve sezon seçin');
+                document.getElementById('standings-table').style.display = 'none';
+                return;
+            }
+
+            showLoading();
+            try {
+                const data = await fetchDataFromBackend(`/football/standings?league=${leagueId}&season=${season}`);
+                if (!data.response || !Array.isArray(data.response)) throw new Error('Invalid standings data');
+                
+                // API her zaman ilk lige ait puan durumunu döndürür (bazı liglerde birden fazla lig olabilir)
+                const league = data.response[0];
+                if (!league || !league.league || !Array.isArray(league.standings)) {
+                    throw new Error('No standings data available');
+                }
+
+                const standings = league.standings[0]; // İlk grup (ana lig)
+                const tbody = document.querySelector('#standings-table tbody');
+                tbody.innerHTML = '';
+                
+                standings.forEach(team => {
+                    const row = document.createElement('tr');
+                    const formString = team.form ? team.form.split('').map(result => {
+                        const color = result === 'W' ? '#4CAF50' : result === 'D' ? '#FFC107' : '#F44336';
+                        return `<span style="display:inline-block;width:16px;height:16px;line-height:16px;text-align:center;border-radius:50%;background:${color};color:white;font-size:10px;margin:0 1px;">${result}</span>`;
+                    }).join('') : '-';
+
+                    row.innerHTML = `
+                        <td style="text-align:center">${team.rank}</td>
+                        <td style="white-space:nowrap"><img src="${team.team.logo}" alt="">${team.team.name}</td>
+                        <td style="text-align:center">${team.all.played}</td>
+                        <td style="text-align:center">${team.all.win}</td>
+                        <td style="text-align:center">${team.all.draw}</td>
+                        <td style="text-align:center">${team.all.lose}</td>
+                        <td style="text-align:center">${team.all.goals.for}</td>
+                        <td style="text-align:center">${team.all.goals.against}</td>
+                        <td style="text-align:center">${team.goalsDiff}</td>
+                        <td style="text-align:center;font-weight:bold">${team.points}</td>
+                        <td style="min-width:90px">${formString}</td>
+                    `;
+                    
+                    // Küme düşme/yükselme pozisyonlarını renklendir
+                    if (team.description) {
+                        if (team.description.includes('Champions')) row.style.backgroundColor = 'rgba(76, 175, 80, 0.1)';
+                        else if (team.description.includes('Europa')) row.style.backgroundColor = 'rgba(33, 150, 243, 0.1)';
+                        else if (team.description.includes('Relegation')) row.style.backgroundColor = 'rgba(244, 67, 54, 0.1)';
+                    }
+                    
+                    tbody.appendChild(row);
+                });
+                
+                document.getElementById('standings-message').style.display = 'none';
+                document.getElementById('standings-table').style.display = 'table';
+            } catch (error) {
+                console.error('Puan durumu yüklenirken hata:', error);
+                displayMessage('standings-message', 'Puan durumu yüklenemedi.', true);
+                document.getElementById('standings-table').style.display = 'none';
+            } finally {
+                hideLoading();
+            }
         };
 
         const openTab = (event) => {
