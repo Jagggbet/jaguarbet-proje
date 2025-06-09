@@ -1,2 +1,4 @@
 /service-worker.js
   Content-Type: application/javascript
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
