@@ -1,5 +1,3 @@
-// functions/api/auth/callback.js (DÜZELTİLMİŞ)
-
 import { sign } from '@tsndr/cloudflare-worker-jwt';
 
 export async function onRequestGet(context) {
@@ -7,10 +5,7 @@ export async function onRequestGet(context) {
     const code = requestUrl.searchParams.get('code');
     const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET, DB } = context.env;
 
-    // Projenin ana sayfa URL'sini dinamik olarak alıyoruz
     const siteUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-    
-    // Google'a gönderdiğimiz redirect URI'nin aynısını burada da kullanıyoruz
     const redirectUri = `${siteUrl}/api/auth/callback`;
 
     if (!code) {
@@ -48,7 +43,6 @@ export async function onRequestGet(context) {
              throw new Error('Google kullanıcı bilgileri alınamadı.');
         }
 
-        // Kullanıcıyı veritabanına ekle veya güncelle
         await DB.prepare(`
             INSERT INTO Users (id, email, name, provider)
             VALUES (?, ?, ?, 'google')
@@ -58,9 +52,8 @@ export async function onRequestGet(context) {
                 provider = 'google'
         `).bind(userInfo.sub, userInfo.email, userInfo.name).run();
 
-        // Kullanıcı için JWT oluştur
         const payload = {
-            sub: userInfo.sub, // Google'ın benzersiz kullanıcı ID'si
+            sub: userInfo.sub,
             email: userInfo.email,
             name: userInfo.name,
             provider: 'google',
@@ -69,7 +62,6 @@ export async function onRequestGet(context) {
 
         const token = await sign(payload, JWT_SECRET);
         
-        // Kullanıcıyı token ile birlikte ana sayfaya yönlendir
         const successUrl = new URL(siteUrl);
         successUrl.searchParams.set('token', token);
         return Response.redirect(successUrl.toString(), 302);
