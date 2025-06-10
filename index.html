@@ -417,36 +417,61 @@
         const showFixtureDetails = async (fixtureId) => {
             openModal();
             modalBody.innerHTML = `<div class="content-loader"><div class="loader"></div>Detaylar Yükleniyor...</div>`;
-
+        
             try {
-                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
-                const fixtureData = data.response[0];
+                let fixtureData = allMatchesData[fixtureId];
+                if (!fixtureData) {
+                    const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
+                    fixtureData = data.response[0];
+                }
+                
                 if (!fixtureData) throw new Error('Maç detayı bulunamadı.');
-
+        
                 modalTitle.textContent = `${fixtureData.teams.home.name} vs ${fixtureData.teams.away.name}`;
                 
                 const h2hData = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/h2h?h2h=${fixtureData.teams.home.id}-${fixtureData.teams.away.id}`);
                 
                 renderModalContent(fixtureData, h2hData.response);
-
+        
             } catch (error) {
                 modalBody.innerHTML = `<div class="content-loader" style="color:var(--danger-color)">Detaylar yüklenirken bir hata oluştu.</div>`;
             }
         };
 
         const renderModalContent = (fixture, h2h) => {
-            modalBody.innerHTML = `
-                <div class="modal-tabs">
-                    <button class="modal-tab-button active" data-tab="summary">Özet</button>
-                    <button class="modal-tab-button" data-tab="stats">İstatistik</button>
-                    <button class="modal-tab-button" data-tab="lineups">Kadrolar</button>
-                    <button class="modal-tab-button" data-tab="h2h">H2H</button>
-                </div>
-                <div id="summary-content" class="modal-tab-content active">${renderSummary(fixture.events, fixture.teams)}</div>
-                <div id="stats-content" class="modal-tab-content">${renderStats(fixture.statistics, fixture.teams)}</div>
-                <div id="lineups-content" class="modal-tab-content">${renderLineups(fixture.lineups)}</div>
-                <div id="h2h-content" class="modal-tab-content">${renderH2H(h2h)}</div>
-            `;
+            const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.fixture.status.short);
+            const hasStarted = !!fixture.fixture.status.elapsed || isFinished;
+
+            let tabsHTML = '';
+            let contentHTML = '';
+            let firstTab = true;
+
+            const addTab = (id, label) => {
+                tabsHTML += `<button class="modal-tab-button ${firstTab ? 'active' : ''}" data-tab="${id}">${label}</button>`;
+                firstTab = false;
+            };
+
+            const addContent = (id, content) => {
+                contentHTML += `<div id="${id}-content" class="modal-tab-content ${contentHTML === '' ? 'active' : ''}">${content}</div>`;
+            };
+
+            if (hasStarted) {
+                addTab('summary', 'Özet');
+                addContent('summary', renderSummary(fixture.events, fixture.teams));
+            }
+            
+            if (isFinished) {
+                addTab('stats', 'İstatistik');
+                addContent('stats', renderStats(fixture.statistics, fixture.teams));
+            }
+            
+            addTab('lineups', 'Kadrolar');
+            addContent('lineups', renderLineups(fixture.lineups, fixture.fixture.id));
+            
+            addTab('h2h', 'H2H');
+            addContent('h2h', renderH2H(h2h));
+
+            modalBody.innerHTML = `<div class="modal-tabs">${tabsHTML}</div>${contentHTML}`;
             
             modalBody.querySelectorAll('.modal-tab-button').forEach(button => {
                 button.addEventListener('click', (e) => {
@@ -474,7 +499,7 @@
         };
 
         const renderSummary = (events, teams) => {
-            if (!events || events.length === 0) return '<p style="text-align:center;color:var(--text-muted-color);">Maç özeti mevcut değil.</p>';
+            if (!events || events.length === 0) return '<p style="text-align:center;padding:2rem;color:var(--text-muted-color);">Maç özeti mevcut değil.</p>';
             return events.map(event => `
                 <div class="event-row" style="flex-direction: ${event.team.id === teams.home.id ? 'row' : 'row-reverse'}">
                     <div class="event-time">${event.time.elapsed}'</div>
@@ -485,7 +510,7 @@
         };
 
         const renderStats = (stats, teams) => {
-            if (!stats || stats.length < 2) return '<p style="text-align:center;color:var(--text-muted-color);">İstatistikler mevcut değil.</p>';
+            if (!stats || stats.length < 2) return '<p style="text-align:center;padding:2rem;color:var(--text-muted-color);">İstatistikler mevcut değil.</p>';
             const homeStats = stats.find(s => s.team.id === teams.home.id)?.statistics || [];
             const awayStats = stats.find(s => s.team.id === teams.away.id)?.statistics || [];
             const statTypes = [...new Set([...homeStats.map(s => s.type), ...awayStats.map(s => s.type)])];
@@ -511,32 +536,32 @@
             }).join('');
         };
 
-        const renderLineups = (lineups) => {
-            if (!lineups || lineups.length < 2) return '<p style="text-align:center;color:var(--text-muted-color);">Kadrolar mevcut değil.</p>';
-            const homeLineup = lineups.find(l => l.team.name === allMatchesData[l.fixture.id].teams.home.name) || lineups[0];
-            const awayLineup = lineups.find(l => l.team.name === allMatchesData[l.fixture.id].teams.away.name) || lineups[1];
+        const renderLineups = (lineups, fixtureId) => {
+            if (!lineups || lineups.length < 2) return '<p style="text-align:center;padding:2rem;color:var(--text-muted-color);">Kadrolar henüz açıklanmadı.</p>';
+            const homeLineup = lineups.find(l => l.team.id === allMatchesData[fixtureId].teams.home.id) || lineups[0];
+            const awayLineup = lineups.find(l => l.team.id === allMatchesData[fixtureId].teams.away.id) || lineups[1];
             
             return `
                 <div class="lineup-container">
                     <div class="lineup-team">
-                        <h4>${homeLineup.team.name} (${homeLineup.formation})</h4>
+                        <h4>${homeLineup.team.name} (${homeLineup.formation || 'N/A'})</h4>
                         <h5>İlk 11</h5>
-                        ${homeLineup.startXI.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                        ${homeLineup.startXI.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
                         <h5 style="margin-top:1rem;">Yedekler</h5>
-                        ${homeLineup.substitutes.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                        ${homeLineup.substitutes.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
                     </div>
                     <div class="lineup-team">
-                        <h4>${awayLineup.team.name} (${awayLineup.formation})</h4>
+                        <h4>${awayLineup.team.name} (${awayLineup.formation || 'N/A'})</h4>
                         <h5>İlk 11</h5>
-                        ${awayLineup.startXI.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                        ${awayLineup.startXI.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
                         <h5 style="margin-top:1rem;">Yedekler</h5>
-                        ${awayLineup.substitutes.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                        ${awayLineup.substitutes.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
                     </div>
                 </div>`;
         };
 
         const renderH2H = (h2h) => {
-            if (!h2h || h2h.length === 0) return '<p style="text-align:center;color:var(--text-muted-color);">Takımlar arasında daha önce oynanmış maç bulunamadı.</p>';
+            if (!h2h || h2h.length === 0) return '<p style="text-align:center;padding:2rem;color:var(--text-muted-color);">Takımlar arasında daha önce oynanmış maç bulunamadı.</p>';
             return h2h.map(match => `
                 <div class="h2h-match-row">
                     <div class="h2h-date">${new Date(match.fixture.date).toLocaleDateString('tr-TR')} - ${match.league.name}</div>
@@ -548,8 +573,8 @@
                 </div>
             `).join('');
         };
-
-        // --- AUTH & FAVORITES & NOTIFICATIONS & STANDINGS ---
+        
+        // --- AUTH, FAVORITES, NOTIFICATIONS & STANDINGS FUNCTIONS ---
         const loginWithGoogle = () => { window.location.href = `${API_BASE_AUTH}/google`; };
         const loginWithWallet = async () => {
             const msg = document.getElementById('login-message');
