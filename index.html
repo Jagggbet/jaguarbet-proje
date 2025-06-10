@@ -420,19 +420,22 @@
             modalBody.innerHTML = `<div class="content-loader"><div class="loader"></div>Detaylar Yükleniyor...</div>`;
         
             try {
-                let fixtureData = allMatchesData[fixtureId];
-                if (!fixtureData || !fixtureData.events) { 
-                    const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
-                    fixtureData = data.response[0];
-                    allMatchesData[fixtureId] = fixtureData;
-                }
-                
-                if (!fixtureData) throw new Error('Maç detayı bulunamadı.');
+                // 1. Önce maçın tüm detaylarını tek bir istekle çek.
+                const fixtureDataResponse = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
+                const fixtureData = fixtureDataResponse.response[0];
         
-                modalTitle.textContent = `${fixtureData.teams.home.name} vs ${fixtureData.teams.away.name}`;
-                
+                if (!fixtureData) {
+                    throw new Error('Maç detayı bulunamadı.');
+                }
+        
+                // 2. Global veri deposunu en güncel haliyle sakla.
+                allMatchesData[fixtureId] = fixtureData;
+        
+                // 3. Artık takım ID'lerini bildiğimiz için H2H verisini çekebiliriz.
                 const h2hData = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/h2h?h2h=${fixtureData.teams.home.id}-${fixtureData.teams.away.id}`);
-                
+        
+                // 4. Modal başlığını ve içeriğini oluştur.
+                modalTitle.textContent = `${fixtureData.teams.home.name} vs ${fixtureData.teams.away.name}`;
                 renderModalContent(fixtureData, h2hData.response);
         
             } catch (error) {
@@ -781,7 +784,7 @@
                     body: JSON.stringify({ endpoint: subscription.endpoint }),
                 });
                 await subscription.unsubscribe();
-                showFavoriteAlert('Bildirimler kapatıldı.');
+                showFavoriteAlert('Bildirimlar kapatıldı.');
             }
         };
         const loadLeagues = async () => {
