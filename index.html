@@ -11,7 +11,7 @@
         body { font-family: 'Roboto', sans-serif; background: var(--background-color); color: var(--text-color); line-height: 1.5; font-size: 15px; }
         .container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
         header { display: flex; justify-content: space-between; align-items: center; background: var(--surface-color); padding: 1rem; font-size: 1.8rem; font-family: 'Orbitron', sans-serif; color: var(--primary-color); border-bottom: 3px solid var(--primary-color); box-shadow: 0 4px 12px rgba(211, 47, 47, 0.1); }
-        #auth-section button, .form-group button, .card button { background: var(--primary-color); color: white; border:none; padding: 8px 12px; font-size: 0.9rem; border-radius: 5px; cursor: pointer; margin-left: 10px; font-weight: bold; }
+        #auth-section button, .form-group button, .card button { background: var(--primary-color); color: white; border:none; padding: 8px 12px; font-size: 0.9rem; border-radius: 5px; cursor: pointer; margin-left: 10px; font-weight: bold; transition: background-color 0.2s; }
         .tabs { display: flex; background-color: var(--surface-highlight-color); border-bottom: 1px solid var(--border-color); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .tabs::-webkit-scrollbar { display: none; }
         .tab-button { padding: 0.8rem 1.2rem; cursor: pointer; border: none; background-color: transparent; color: var(--text-muted-color); font-size: 0.9rem; font-weight: 500; transition: all 0.25s ease-in-out; border-bottom: 3px solid transparent; white-space: nowrap; }
@@ -32,10 +32,10 @@
         .league-flag { width: 22px; height: auto; margin-right: 10px; border-radius: 3px; object-fit: cover; }
         .league-info .league-name { font-size: 1rem; font-weight: 700; color: var(--text-color); }
         .league-info .country-name { font-size: 0.8rem; color: var(--text-muted-color); }
-        .match-row { display: flex; align-items: center; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); background-color: var(--surface-color); transition: background-color 0.2s ease; position: relative; overflow: hidden; }
+        .match-row { display: flex; align-items: center; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border-color); background-color: var(--surface-color); transition: background-color 0.2s ease; position: relative; overflow: hidden; cursor: pointer; }
         .league-matches .match-row:last-child { border-bottom: none; border-radius: 0 0 6px 6px; }
         .match-row:hover { background-color: var(--surface-highlight-color); }
-        .match-status { font-size: 0.85rem; color: var(--text-muted-color); font-weight: 500; width: 50px; text-align: center; margin-right: 0.8rem; flex-shrink: 0;}
+        .match-status { font-size: 0.85rem; color: var(--text-muted-color); font-weight: 500; width: 60px; text-align: center; margin-right: 0.8rem; flex-shrink: 0;}
         .match-teams { flex-grow: 1; margin-right: 0.8rem; }
         .team-line { display: flex; align-items: center; margin-bottom: 0.3rem; }
         .team-line:last-child { margin-bottom: 0; }
@@ -43,15 +43,15 @@
         .team-name { font-size: 0.9rem; color: var(--text-color); }
         .match-scores { display: flex; flex-direction: column; align-items: center; width: 25px; font-weight: 700; }
         .score-value { font-size: 1rem; color: var(--text-color); }
-        .favorite-toggle { cursor: pointer; font-size: 1.4rem; line-height: 1; color: #555; transition: color 0.2s, transform 0.2s; margin-left: 1rem; padding: 5px; user-select: none; }
+        .favorite-toggle { cursor: pointer; font-size: 1.4rem; line-height: 1; color: #555; transition: color 0.2s, transform 0.2s; margin-left: 1rem; padding: 5px; user-select: none; z-index: 2; }
         .favorite-toggle:hover { transform: scale(1.2); }
         .favorite-toggle.is-favorite { color: var(--favorite-color); }
         .favorite-toggle.favorite-animate { animation: favorite-pop 0.3s ease-in-out; }
         @keyframes favorite-pop { 0% { transform: scale(1); } 50% { transform: scale(1.4); } 100% { transform: scale(1); } }
-        #favorite-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: var(--surface-color); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 8px; padding: 12px 32px; font-size: 1rem; z-index: 3000; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; opacity: 0; transition: opacity 0.3s; }
         #loading-indicator, .content-loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: rgba(0,0,0,0.85); color: var(--primary-color); padding: 20px 30px; border-radius: 10px; font-size: 1rem; z-index: 2000; display: none; text-align: center; flex-direction: column; align-items: center; justify-content: center; }
         .content-loader { position: static; transform: none; background: transparent; padding: 2rem; }
         .loader { border: 4px solid #f3f3f330; border-radius: 50%; border-top: 4px solid var(--primary-color); width: 28px; height: 28px; animation: spin 1s linear infinite; margin: 0 auto 8px auto; }
+        #favorite-alert { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: var(--surface-color); color: var(--primary-color); border: 1px solid var(--primary-color); border-radius: 8px; padding: 12px 32px; font-size: 1rem; z-index: 3000; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; opacity: 0; transition: opacity 0.3s; }
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-size: 0.9rem; }
         th, td { text-align: left; padding: 0.8rem; border-bottom: 1px solid var(--border-color); }
@@ -79,6 +79,39 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); }
         input:checked + .slider:before { transform: translateX(20px); }
+        
+        /* MODAL İÇİN YENİ STİLLER */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-container { background: var(--surface-color); width: 95%; max-width: 800px; max-height: 90vh; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); }
+        .modal-header { padding: 1rem 1.5rem; background: var(--surface-highlight-color); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .modal-title { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); }
+        .modal-close { font-size: 1.8rem; color: var(--text-muted-color); cursor: pointer; background: none; border: none; padding: 0; line-height: 1; }
+        .modal-body { overflow-y: auto; padding: 1.5rem; }
+        .modal-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin: -1.5rem -1.5rem 1.5rem; padding: 0 1.5rem; }
+        .modal-tab-button { padding: 1rem 0.5rem; margin-right: 1.5rem; cursor: pointer; border: none; background: transparent; color: var(--text-muted-color); border-bottom: 3px solid transparent; font-size: 0.9rem; font-weight: 500; }
+        .modal-tab-button.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+        .modal-tab-content { display: none; }
+        .modal-tab-content.active { display: block; }
+        .event-row { display: flex; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem; }
+        .event-row:last-child { border-bottom: none; }
+        .event-time { font-weight: 700; width: 50px; text-align: center; }
+        .event-icon { margin: 0 1rem; width: 20px; text-align: center; display:flex; justify-content:center; align-items:center; }
+        .event-details { flex-grow: 1; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.9rem; }
+        .stat-title { text-align:center; margin-bottom:0.5rem; font-weight:bold; color: var(--text-muted-color); }
+        .stat-bar-container { display: flex; align-items: center; margin: 0 1rem; }
+        .stat-bar-wrapper { flex-grow: 1; height: 8px; background-color: var(--surface-highlight-color); border-radius: 4px; display: flex; }
+        .stat-bar { height: 100%; border-radius: 4px; }
+        .lineup-container { display: flex; justify-content: space-between; gap: 2rem; }
+        .lineup-team { width: 50%; }
+        .lineup-team h4 { margin-bottom: 1rem; text-align: center; color: var(--primary-color); }
+        .lineup-team h5 { margin-top:1.5rem; margin-bottom:0.5rem; font-size:0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.3rem;}
+        .player-row { display: flex; align-items: center; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .h2h-match-row { border-bottom: 1px solid var(--border-color); padding: 0.8rem 0; }
+        .h2h-match-row:last-child { border-bottom: none; }
+        .h2h-teams { display: flex; justify-content: space-between; font-size: 0.9rem; align-items:center; }
+        .h2h-score { font-weight: bold; padding: 0 1rem; }
+        .h2h-date { font-size: 0.8rem; color: var(--text-muted-color); text-align: center; margin-top: 0.3rem; }
     </style>
 </head>
 <body>
@@ -201,10 +234,20 @@
         </div>
     </div>
     
+    <div id="fixture-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div id="modal-title" class="modal-title"></div>
+                <button id="modal-close-btn" class="modal-close">×</button>
+            </div>
+            <div id="modal-body" class="modal-body"></div>
+        </div>
+    </div>
+    
     <div id="loading-indicator"><div class="loader"></div>Veri Yükleniyor...</div>
     <div id="favorite-alert"></div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js" type="application/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     <script>
         const API_BASE_AUTH = '/api/auth';
         const API_BASE_FOOTBALL = '/api/football';
@@ -217,8 +260,11 @@
         let allMatchesData = {};
         let liveMatchIntervalId = null;
         const loadingIndicator = document.getElementById('loading-indicator');
+        const modal = document.getElementById('fixture-modal');
+        const modalBody = document.getElementById('modal-body');
+        const modalTitle = document.getElementById('modal-title');
 
-        // --- TEMEL YARDIMCI FONKSİYONLAR ---
+        // --- HELPER FUNCTIONS ---
         const getGuestFavorites = () => new Set(JSON.parse(localStorage.getItem('guest_favorites') || '[]').map(Number));
         const saveGuestFavorites = (favsSet) => localStorage.setItem('guest_favorites', JSON.stringify(Array.from(favsSet)));
         const getCurrentFavorites = () => currentUser ? userDbFavorites : getGuestFavorites();
@@ -237,15 +283,13 @@
             for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
             return outputArray;
         };
-
-        // --- DATA FETCHING ---
         const fetchDataFromBackend = async (endpoint, options = {}) => {
             const response = await fetch(endpoint, options);
             if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
             return response.json();
         };
-        
-        // --- RENDER FONKSİYONLARI ---
+
+        // --- RENDER FUNCTIONS ---
         const createLeagueHeaderElement = (league) => `
             <div class="league-group-header">
                 <img src="${league.logo}" alt="${league.country}" class="league-flag">
@@ -262,7 +306,7 @@
             
             let statusText;
             const shortStatus = fixture.status.short;
-            const statusMap = {'FT':'Bitti', 'AET':'Bitti (UZT)', 'PEN':'Bitti (PEN)', 'CANC':'İptal', 'ABD':'Terk Edildi', 'PST':'Ertelendi'};
+            const statusMap = {'FT':'Bitti', 'AET':'Bitti (UZT)', 'PEN':'Bitti (PEN)', 'CANC':'İptal', 'ABD':'Terk Edildi', 'PST':'Ertelendi', 'AWD': 'Hükmen', 'WO': 'Hükmen'};
 
             if (statusMap[shortStatus]) {
                 statusText = statusMap[shortStatus];
@@ -273,7 +317,7 @@
             }
 
             return `
-                <div class="match-row" id="match-${fixture.id}">
+                <div class="match-row" id="match-${fixture.id}" onclick="showFixtureDetails(${fixture.id})">
                     <div class="match-status">${statusText}</div>
                     <div class="match-teams">
                         <div class="team-line"><img src="${teams.home.logo}" class="team-logo" alt="${teams.home.name}">${teams.home.name}</div>
@@ -315,7 +359,7 @@
             container.innerHTML = html;
         };
 
-        // --- ÇEKME MANTIĞI ---
+        // --- FETCH LOGIC ---
         const fetchLiveMatches = async (isUpdate = false) => {
             if (!isUpdate) showLoading();
             try {
@@ -366,9 +410,147 @@
             renderFixtures(container, favoriteMatches, 'favorites');
         };
 
-        // --- AUTH & FAVORITES & NOTIFICATIONS ---
-        const loginWithGoogle = () => { window.location.href = `${API_BASE_AUTH}/google`; };
+        // --- MODAL FUNCTIONS ---
+        const openModal = () => modal.style.display = 'flex';
+        const closeModal = () => modal.style.display = 'none';
 
+        const showFixtureDetails = async (fixtureId) => {
+            openModal();
+            modalBody.innerHTML = `<div class="content-loader"><div class="loader"></div>Detaylar Yükleniyor...</div>`;
+
+            try {
+                const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
+                const fixtureData = data.response[0];
+                if (!fixtureData) throw new Error('Maç detayı bulunamadı.');
+
+                modalTitle.textContent = `${fixtureData.teams.home.name} vs ${fixtureData.teams.away.name}`;
+                
+                const h2hData = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/h2h?h2h=${fixtureData.teams.home.id}-${fixtureData.teams.away.id}`);
+                
+                renderModalContent(fixtureData, h2hData.response);
+
+            } catch (error) {
+                modalBody.innerHTML = `<div class="content-loader" style="color:var(--danger-color)">Detaylar yüklenirken bir hata oluştu.</div>`;
+            }
+        };
+
+        const renderModalContent = (fixture, h2h) => {
+            modalBody.innerHTML = `
+                <div class="modal-tabs">
+                    <button class="modal-tab-button active" data-tab="summary">Özet</button>
+                    <button class="modal-tab-button" data-tab="stats">İstatistik</button>
+                    <button class="modal-tab-button" data-tab="lineups">Kadrolar</button>
+                    <button class="modal-tab-button" data-tab="h2h">H2H</button>
+                </div>
+                <div id="summary-content" class="modal-tab-content active">${renderSummary(fixture.events, fixture.teams)}</div>
+                <div id="stats-content" class="modal-tab-content">${renderStats(fixture.statistics, fixture.teams)}</div>
+                <div id="lineups-content" class="modal-tab-content">${renderLineups(fixture.lineups)}</div>
+                <div id="h2h-content" class="modal-tab-content">${renderH2H(h2h)}</div>
+            `;
+            
+            modalBody.querySelectorAll('.modal-tab-button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const tabId = e.target.dataset.tab + '-content';
+                    modalBody.querySelectorAll('.modal-tab-content, .modal-tab-button').forEach(el => el.classList.remove('active'));
+                    e.target.classList.add('active');
+                    modalBody.querySelector('#' + tabId).classList.add('active');
+                });
+            });
+        };
+
+        const getEventIcon = (type, detail) => {
+            if (type === 'Goal') {
+                if (detail === 'Own Goal') return '⚽ <small>(KK)</small>';
+                if (detail === 'Penalty') return '⚽ <small>(P)</small>';
+                return '⚽';
+            }
+            if (type === 'Card') {
+                if (detail === 'Yellow Card') return '<div style="width:12px;height:16px;background:yellow;border:1px solid #ccc;"></div>';
+                if (detail === 'Red Card') return '<div style="width:12px;height:16px;background:red;border:1px solid #ccc;"></div>';
+            }
+            if (type === 'subst') return '🔄';
+            if (type === 'Var') return '📺';
+            return '';
+        };
+
+        const renderSummary = (events, teams) => {
+            if (!events || events.length === 0) return '<p style="text-align:center;color:var(--text-muted-color);">Maç özeti mevcut değil.</p>';
+            return events.map(event => `
+                <div class="event-row" style="flex-direction: ${event.team.id === teams.home.id ? 'row' : 'row-reverse'}">
+                    <div class="event-time">${event.time.elapsed}'</div>
+                    <div class="event-icon">${getEventIcon(event.type, event.detail)}</div>
+                    <div class="event-details" style="text-align:${event.team.id === teams.home.id ? 'left' : 'right'}"><strong>${event.player.name}</strong><br><small>${event.assist.name ? 'Asist: ' + event.assist.name : ''}</small></div>
+                </div>
+            `).join('');
+        };
+
+        const renderStats = (stats, teams) => {
+            if (!stats || stats.length < 2) return '<p style="text-align:center;color:var(--text-muted-color);">İstatistikler mevcut değil.</p>';
+            const homeStats = stats.find(s => s.team.id === teams.home.id)?.statistics || [];
+            const awayStats = stats.find(s => s.team.id === teams.away.id)?.statistics || [];
+            const statTypes = [...new Set([...homeStats.map(s => s.type), ...awayStats.map(s => s.type)])];
+
+            return statTypes.map(type => {
+                const homeValue = homeStats.find(s => s.type === type)?.value || 0;
+                const awayValue = awayStats.find(s => s.type === type)?.value || 0;
+                const total = (parseInt(String(homeValue).replace('%','')) || 0) + (parseInt(String(awayValue).replace('%','')) || 0);
+                const homeWidth = total > 0 ? ((parseInt(String(homeValue).replace('%','')) || 0) / total) * 100 : 50;
+
+                return `
+                    <div class="stat-title">${type}</div>
+                    <div class="stat-row">
+                        <span>${homeValue ?? '0'}</span>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar-wrapper">
+                                <div class="stat-bar" style="width: ${homeWidth}%; background: var(--text-color);"></div>
+                                <div class="stat-bar" style="width: ${100 - homeWidth}%; background: var(--primary-color);"></div>
+                            </div>
+                        </div>
+                        <span>${awayValue ?? '0'}</span>
+                    </div>`;
+            }).join('');
+        };
+
+        const renderLineups = (lineups) => {
+            if (!lineups || lineups.length < 2) return '<p style="text-align:center;color:var(--text-muted-color);">Kadrolar mevcut değil.</p>';
+            const homeLineup = lineups.find(l => l.team.name === allMatchesData[l.fixture.id].teams.home.name) || lineups[0];
+            const awayLineup = lineups.find(l => l.team.name === allMatchesData[l.fixture.id].teams.away.name) || lineups[1];
+            
+            return `
+                <div class="lineup-container">
+                    <div class="lineup-team">
+                        <h4>${homeLineup.team.name} (${homeLineup.formation})</h4>
+                        <h5>İlk 11</h5>
+                        ${homeLineup.startXI.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                        <h5 style="margin-top:1rem;">Yedekler</h5>
+                        ${homeLineup.substitutes.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                    </div>
+                    <div class="lineup-team">
+                        <h4>${awayLineup.team.name} (${awayLineup.formation})</h4>
+                        <h5>İlk 11</h5>
+                        ${awayLineup.startXI.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                        <h5 style="margin-top:1rem;">Yedekler</h5>
+                        ${awayLineup.substitutes.map(p => `<div class="player-row">${p.player.number}. ${p.player.name}</div>`).join('')}
+                    </div>
+                </div>`;
+        };
+
+        const renderH2H = (h2h) => {
+            if (!h2h || h2h.length === 0) return '<p style="text-align:center;color:var(--text-muted-color);">Takımlar arasında daha önce oynanmış maç bulunamadı.</p>';
+            return h2h.map(match => `
+                <div class="h2h-match-row">
+                    <div class="h2h-date">${new Date(match.fixture.date).toLocaleDateString('tr-TR')} - ${match.league.name}</div>
+                    <div class="h2h-teams">
+                        <span>${match.teams.home.name}</span>
+                        <span class="h2h-score">${match.goals.home} - ${match.goals.away}</span>
+                        <span>${match.teams.away.name}</span>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // --- AUTH & FAVORITES & NOTIFICATIONS & STANDINGS ---
+        const loginWithGoogle = () => { window.location.href = `${API_BASE_AUTH}/google`; };
         const loginWithWallet = async () => {
             const msg = document.getElementById('login-message');
             msg.textContent = '';
@@ -396,7 +578,6 @@
                 hideLoading();
             }
         };
-
         const logout = () => {
             localStorage.removeItem('user_token');
             currentUser = null;
@@ -405,7 +586,6 @@
             updateAllFavoriteIcons();
             renderFavoriteMatches();
         };
-
         const checkForLoggedInUser = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const tokenFromUrl = urlParams.get('token');
@@ -439,7 +619,6 @@
             updateAllFavoriteIcons();
             renderFavoriteMatches();
         };
-
         const updateUI = () => {
             const authSection = document.getElementById('auth-section');
             const profileSection = document.getElementById('profile-section');
@@ -462,7 +641,6 @@
                 profileSection.style.display = 'none';
             }
         };
-
         const toggleProfileMenu = () => {
             const menu = document.getElementById('profile-menu');
             const button = document.getElementById('profile-button');
@@ -470,7 +648,6 @@
             menu.style.display = isVisible ? 'none' : 'block';
             button.classList.toggle('open', !isVisible);
         };
-        
         const loadUserFavorites = async () => {
             const token = localStorage.getItem('user_token');
             if (!token) return;
@@ -479,7 +656,6 @@
                 userDbFavorites = new Set(favs.map(Number));
             } catch (error) { console.error('Favoriler yüklenirken hata:', error); }
         };
-
         const saveFavorites = async () => {
             if (!currentUser) return;
             const token = localStorage.getItem('user_token');
@@ -491,7 +667,6 @@
                 });
             } catch (error) { console.error('Favoriler kaydedilirken hata:', error); }
         };
-
         const toggleFavorite = (fixtureIdStr, event) => {
             event.stopPropagation();
             const fixtureId = parseInt(fixtureIdStr, 10);
@@ -509,7 +684,6 @@
             updateAllFavoriteIcons();
             renderFavoriteMatches();
         };
-
         const showFavoriteAlert = (msg) => {
             const alertDiv = document.getElementById('favorite-alert');
             alertDiv.textContent = msg;
@@ -520,7 +694,6 @@
                 setTimeout(() => alertDiv.style.display = 'none', 300);
             }, 2000);
         };
-
         const updateAllFavoriteIcons = () => {
             const favorites = getCurrentFavorites();
             document.querySelectorAll('.favorite-toggle').forEach(icon => {
@@ -528,7 +701,6 @@
                 icon.classList.toggle('is-favorite', favorites.has(fixtureId));
             });
         };
-
         const handleNotificationSwitch = async () => {
             const isChecked = document.getElementById('notification-switch').checked;
             try {
@@ -540,7 +712,6 @@
                 showFavoriteAlert('Bildirim ayarı değiştirilemedi.');
             }
         };
-
         const updateNotificationSwitch = async () => {
             const item = document.getElementById('notification-item');
             if (!('serviceWorker' in navigator) || !('PushManager' in window) || !FCM_VAPID_PUBLIC_KEY) {
@@ -557,7 +728,6 @@
                 item.style.display = 'none';
             }
         };
-
         const subscribeUserToPush = async () => {
             const permission = await Notification.requestPermission();
             if (permission !== 'granted') throw new Error('Bildirim izni verilmedi.');
@@ -573,7 +743,6 @@
             });
             showFavoriteAlert('Bildirimler açıldı!');
         };
-        
         const unsubscribeUserFromPush = async () => {
             const registration = await navigator.serviceWorker.ready;
             const subscription = await registration.pushManager.getSubscription();
@@ -587,8 +756,6 @@
                 showFavoriteAlert('Bildirimler kapatıldı.');
             }
         };
-        
-        // --- PUAN DURUMU ---
         const loadLeagues = async () => {
             try {
                 const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/leagues`);
@@ -603,7 +770,6 @@
                 });
             } catch (error) { console.error('Ligler yüklenirken hata:', error); }
         };
-
         const loadSeasons = async () => {
             try {
                 const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/seasons`);
@@ -615,7 +781,6 @@
                 });
             } catch (error) { console.error('Sezonlar yüklenirken hata:', error); }
         };
-
         const fetchStandings = async () => {
             const leagueId = document.getElementById('league-select').value;
             const season = document.getElementById('season-select').value;
@@ -658,7 +823,7 @@
             }
         };
 
-        // --- SAYFA BAŞLATMA ---
+        // --- PAGE INITIALIZATION ---
         const openTab = (event) => {
             const tabName = event.currentTarget.dataset.tab;
             document.querySelectorAll('.tab-content, .tab-button').forEach(el => el.classList.remove('active'));
@@ -669,9 +834,7 @@
 
         const initializePage = async () => {
             if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.register('/service-worker.js');
-                } catch(err) { console.error('Service Worker kaydı başarısız:', err); }
+                try { await navigator.serviceWorker.register('/service-worker.js'); } catch(err) { console.error('Service Worker kaydı başarısız:', err); }
             }
             
             document.getElementById('google-login-btn').addEventListener('click', loginWithGoogle);
@@ -680,6 +843,8 @@
             document.getElementById('profile-button').addEventListener('click', toggleProfileMenu);
             document.querySelectorAll('.tab-button').forEach(button => button.addEventListener('click', openTab));
             document.getElementById('notification-switch').addEventListener('change', handleNotificationSwitch);
+            document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+            modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
             window.addEventListener('click', (event) => {
                 if (!event.target.closest('#profile-section')) {
                     const menu = document.getElementById('profile-menu');
