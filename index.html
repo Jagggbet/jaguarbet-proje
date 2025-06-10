@@ -420,9 +420,10 @@
         
             try {
                 let fixtureData = allMatchesData[fixtureId];
-                if (!fixtureData) {
+                if (!fixtureData || !fixtureData.events) { // Eğer detaylar eksikse API'den çek
                     const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
                     fixtureData = data.response[0];
+                    allMatchesData[fixtureId] = fixtureData; // Cache'i güncelle
                 }
                 
                 if (!fixtureData) throw new Error('Maç detayı bulunamadı.');
@@ -434,6 +435,7 @@
                 renderModalContent(fixtureData, h2hData.response);
         
             } catch (error) {
+                console.error("Detaylar çekilirken hata:", error);
                 modalBody.innerHTML = `<div class="content-loader" style="color:var(--danger-color)">Detaylar yüklenirken bir hata oluştu.</div>`;
             }
         };
