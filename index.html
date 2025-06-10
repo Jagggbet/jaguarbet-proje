@@ -909,7 +909,7 @@
             await loadLeagues();
             await loadSeasons();
             
-            liveMatchIntervalId = setInterval(() => fetchLiveMatches(true), 120000);
+            liveMatchIntervalId = setInterval(() => fetchLiveMatches(true), 15000);
         };
         
         document.addEventListener('DOMContentLoaded', initializePage);

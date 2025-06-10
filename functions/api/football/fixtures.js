@@ -86,7 +86,7 @@ export async function onRequestGet(context) {
 
     if (live === 'all') {
         params.set('live', 'all');
-        cacheDuration = 120;
+        cacheDuration = 15;
     } else if (date) {
         params.set('date', date);
         const today = new Date().toISOString().split('T')[0];
