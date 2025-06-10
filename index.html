@@ -6,6 +6,7 @@
     <title>JaguarBet - Canlı Skor & İstatistik</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        /* TÜM CSS KODU (DEĞİŞMEDİ) */
         :root { --primary-color: #D32F2F; --primary-hover-color: #B71C1C; --live-text-color: #D32F2F; --favorite-color: #ffc107; --goal-flash-bg: #D32F2F; --background-color: #121212; --surface-color: #1E1E1E; --surface-highlight-color: #2A2A2A; --text-color: #E0E0E0; --text-muted-color: #B0B0B0; --border-color: #333333; --danger-color: #FF4D4D; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Roboto', sans-serif; background: var(--background-color); color: var(--text-color); line-height: 1.5; font-size: 15px; }
@@ -420,10 +421,10 @@
         
             try {
                 let fixtureData = allMatchesData[fixtureId];
-                if (!fixtureData || !fixtureData.events) { // Eğer detaylar eksikse API'den çek
+                if (!fixtureData || !fixtureData.events) { 
                     const data = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
                     fixtureData = data.response[0];
-                    allMatchesData[fixtureId] = fixtureData; // Cache'i güncelle
+                    allMatchesData[fixtureId] = fixtureData;
                 }
                 
                 if (!fixtureData) throw new Error('Maç detayı bulunamadı.');
@@ -443,36 +444,36 @@
         const renderModalContent = (fixture, h2h) => {
             const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.fixture.status.short);
             const hasStarted = !!fixture.fixture.status.elapsed || isFinished;
-
+        
             let tabsHTML = '';
             let contentHTML = '';
-            let firstTab = true;
-
+            let firstTabSet = false;
+        
             const addTab = (id, label) => {
-                tabsHTML += `<button class="modal-tab-button ${firstTab ? 'active' : ''}" data-tab="${id}">${label}</button>`;
-                firstTab = false;
+                tabsHTML += `<button class="modal-tab-button ${!firstTabSet ? 'active' : ''}" data-tab="${id}">${label}</button>`;
+                firstTabSet = true;
             };
-
+        
             const addContent = (id, content) => {
                 contentHTML += `<div id="${id}-content" class="modal-tab-content ${contentHTML === '' ? 'active' : ''}">${content}</div>`;
             };
-
-            if (hasStarted) {
+        
+            if (hasStarted || isFinished) {
                 addTab('summary', 'Özet');
                 addContent('summary', renderSummary(fixture.events, fixture.teams));
             }
-            
+        
             if (isFinished) {
                 addTab('stats', 'İstatistik');
                 addContent('stats', renderStats(fixture.statistics, fixture.teams));
             }
-            
+        
             addTab('lineups', 'Kadrolar');
             addContent('lineups', renderLineups(fixture.lineups, fixture.fixture.id));
-            
+        
             addTab('h2h', 'H2H');
             addContent('h2h', renderH2H(h2h));
-
+        
             modalBody.innerHTML = `<div class="modal-tabs">${tabsHTML}</div>${contentHTML}`;
             
             modalBody.querySelectorAll('.modal-tab-button').forEach(button => {

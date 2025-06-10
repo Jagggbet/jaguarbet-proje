@@ -2,10 +2,10 @@ export async function onRequestGet(context) {
     const { env } = context;
     const apiKey = env.API_FOOTBALL_KEY;
     const url = new URL(context.request.url);
-    const h2h = url.searchParams.get('h2h'); // Örn: "33-34"
-    if (!h2h) return new Response(JSON.stringify({ error: "H2H parametresi gerekli" }), { status: 400 });
+    const fixtureId = url.searchParams.get('id');
+    if (!fixtureId) return new Response(JSON.stringify({ error: "Maç ID'si gerekli" }), { status: 400 });
 
-    const apiUrl = `https://v3.football.api-sports.io/fixtures/headtohead?h2h=${h2h}&last=10`;
+    const apiUrl = `https://v3.football.api-sports.io/fixtures/statistics?fixture=${fixtureId}`;
     const response = await fetch(apiUrl, { headers: { 'x-apisports-key': apiKey, 'x-rapidapi-host': 'v3.football.api-sports.io' } });
     return response;
 }
