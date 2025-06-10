@@ -249,6 +249,10 @@
     <div id="favorite-alert"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    
+    <!-- YENİ EKLENEN SATIR -->
+    <script src="analytics.js"></script>
+    
     <script>
         const API_BASE_AUTH = '/api/auth';
         const API_BASE_FOOTBALL = '/api/football';
@@ -284,7 +288,13 @@
             for (let i = 0; i < rawData.length; ++i) { outputArray[i] = rawData.charCodeAt(i); }
             return outputArray;
         };
+        
         const fetchDataFromBackend = async (endpoint, options = {}) => {
+            // DEDEKTİFİ DEVREYE SOKUYORUZ!
+            if (typeof JaguarAnalytics !== 'undefined') {
+                JaguarAnalytics.logRequest(endpoint);
+            }
+
             const response = await fetch(endpoint, options);
             if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
             return response.json();
