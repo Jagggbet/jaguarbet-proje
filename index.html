@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en"> <!-- Dil İngilizce olarak güncellendi -->
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JaguarBet - Live Scores & Stats</title> <!-- Başlık İngilizce olarak güncellendi -->
+    <title>JaguarBet - Live Scores & Stats</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         /* MEVCUT TÜM CSS KODU */
@@ -271,7 +271,7 @@
         const API_BASE_AUTH = '/api/auth';
         const API_BASE_FOOTBALL = '/api/football';
         const API_BASE_NOTIFICATIONS = '/api/notifications';
-        const API_BASE_PREDICTIONS = '/api/predictions'; // YENİ EKLENDİ
+        const API_BASE_PREDICTIONS = '/api/predictions';
         const API_BASE_CONFIG = '/api/config';
         
         let FCM_VAPID_PUBLIC_KEY = null;
@@ -459,7 +459,6 @@
             }
         };
 
-        // GÜNCELLENMİŞ renderModalContent FONKSİYONU
         const renderModalContent = (fixture, h2h) => {
             const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.fixture.status.short);
             const hasStarted = !!fixture.fixture.status.elapsed || isFinished;
@@ -911,7 +910,7 @@
                 const listener = (id, creator) => {
                     if (creator.toLowerCase() === currentUser.address.toLowerCase()) {
                         predictionId = id.toNumber();
-                        contract.off("PredictionCreated", listener); // Listener'ı kaldır
+                        contract.off("PredictionCreated", listener);
                     }
                 };
                 contract.on("PredictionCreated", listener);
@@ -920,7 +919,6 @@
                 showPredictionStatus("Waiting for transaction confirmation...", false);
                 await tx.wait();
                 
-                // Event'in yakalanması için kısa bir bekleme süresi
                 for(let i=0; i < 5 && predictionId === undefined; i++) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
@@ -1003,7 +1001,7 @@
                 const allowance = await tokenContract.allowance(userAddress, jagWinSoccerAddress);
                 if (allowance.lt(entryFee)) {
                     showFavoriteAlert("Approval needed. Please confirm in your wallet...");
-                    const approveTx = await tokenContract.approve(jagWinSoccerAddress, entryFee); // Sadece gerekli miktar için izin iste
+                    const approveTx = await tokenContract.approve(jagWinSoccerAddress, entryFee);
                     await approveTx.wait();
                     showFavoriteAlert("Approval successful! Now joining...");
                 }
@@ -1014,7 +1012,8 @@
                 
                 showFavoriteAlert("Successfully joined the prediction! 🎉");
                 // Tahmin listesini yenile
-                const fixtureId = modalBody.querySelector('.modal-tab-button[data-tab="predictions"]')?.dataset.fixtureId;
+                const fixtureIdElement = modalBody.querySelector('.modal-tab-button[data-tab="predictions"]');
+                const fixtureId = fixtureIdElement ? fixtureIdElement.dataset.fixtureId : null;
                 if(fixtureId) loadPredictionsForFixture(fixtureId);
 
             } catch(error) {
