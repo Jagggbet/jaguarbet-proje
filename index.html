@@ -6,7 +6,7 @@
     <title>JaguarBet - Canlı Skor & İstatistik</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* TÜM CSS KODU (DEĞİŞMEDİ) */
+        /* TÜM CSS KODU */
         :root { --primary-color: #D32F2F; --primary-hover-color: #B71C1C; --live-text-color: #D32F2F; --favorite-color: #ffc107; --goal-flash-bg: #D32F2F; --background-color: #121212; --surface-color: #1E1E1E; --surface-highlight-color: #2A2A2A; --text-color: #E0E0E0; --text-muted-color: #B0B0B0; --border-color: #333333; --danger-color: #FF4D4D; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Roboto', sans-serif; background: var(--background-color); color: var(--text-color); line-height: 1.5; font-size: 15px; }
@@ -80,8 +80,6 @@
         input:checked + .slider { background-color: var(--primary-color); }
         input:focus + .slider { box-shadow: 0 0 1px var(--primary-color); }
         input:checked + .slider:before { transform: translateX(20px); }
-        
-        /* MODAL İÇİN YENİ STİLLER */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .modal-container { background: var(--surface-color); width: 95%; max-width: 800px; max-height: 90vh; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.4); display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-color); }
         .modal-header { padding: 1rem 1.5rem; background: var(--surface-highlight-color); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
@@ -113,6 +111,77 @@
         .h2h-teams { display: flex; justify-content: space-between; font-size: 0.9rem; align-items:center; }
         .h2h-score { font-weight: bold; padding: 0 1rem; }
         .h2h-date { font-size: 0.8rem; color: var(--text-muted-color); text-align: center; margin-top: 0.3rem; }
+        
+        /* --- YENİ EKLENEN PREDICTION MARKET STYLES --- */
+        .prediction-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .prediction-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+        .prediction-form .form-grid {
+            grid-template-columns: 1fr 1fr 100px auto; /* Sütunları ayarla */
+            gap: 1rem;
+            align-items: end;
+        }
+        .prediction-form .form-group {
+            margin-bottom: 0;
+        }
+        .btn-create-prediction {
+            background-color: #4CAF50; /* Yeşil renk */
+            padding: 10px 15px !important;
+            font-size: 0.9rem !important;
+        }
+        .btn-create-prediction:hover {
+            background-color: #45a049;
+        }
+        .prediction-list .prediction-item {
+            background: var(--surface-highlight-color);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--favorite-color);
+        }
+        .prediction-list .prediction-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+        .prediction-list .prediction-creator {
+            font-size: 0.8rem;
+            color: var(--text-muted-color);
+            word-break: break-all;
+        }
+        .prediction-list .prediction-details {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .prediction-list .prediction-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .prediction-list .prediction-meta span {
+            font-size: 0.9rem;
+        }
+        .btn-join-prediction {
+            background-color: var(--primary-color);
+            padding: 8px 15px;
+            font-size: 0.9rem;
+        }
+        #prediction-status {
+            margin-top: 1rem;
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            display: none; /* Başlangıçta gizli */
+        }
     </style>
 </head>
 <body>
@@ -250,7 +319,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     
-    <!-- YENİ EKLENEN SATIR -->
     <script src="analytics.js"></script>
     
     <script>
@@ -290,11 +358,9 @@
         };
         
         const fetchDataFromBackend = async (endpoint, options = {}) => {
-            // DEDEKTİFİ DEVREYE SOKUYORUZ!
             if (typeof JaguarAnalytics !== 'undefined') {
                 JaguarAnalytics.logRequest(endpoint);
             }
-
             const response = await fetch(endpoint, options);
             if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
             return response.json();
@@ -430,24 +496,13 @@
             modalBody.innerHTML = `<div class="content-loader"><div class="loader"></div>Detaylar Yükleniyor...</div>`;
         
             try {
-                // 1. Önce maçın tüm detaylarını tek bir istekle çek.
                 const fixtureDataResponse = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/fixture-details?id=${fixtureId}`);
                 const fixtureData = fixtureDataResponse.response[0];
-        
-                if (!fixtureData) {
-                    throw new Error('Maç detayı bulunamadı.');
-                }
-        
-                // 2. Global veri deposunu en güncel haliyle sakla.
+                if (!fixtureData) { throw new Error('Maç detayı bulunamadı.'); }
                 allMatchesData[fixtureId] = fixtureData;
-        
-                // 3. Artık takım ID'lerini bildiğimiz için H2H verisini çekebiliriz.
                 const h2hData = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/h2h?h2h=${fixtureData.teams.home.id}-${fixtureData.teams.away.id}`);
-        
-                // 4. Modal başlığını ve içeriğini oluştur.
                 modalTitle.textContent = `${fixtureData.teams.home.name} vs ${fixtureData.teams.away.name}`;
                 renderModalContent(fixtureData, h2hData.response);
-        
             } catch (error) {
                 console.error("Detaylar çekilirken hata:", error);
                 modalBody.innerHTML = `<div class="content-loader" style="color:var(--danger-color)">Detaylar yüklenirken bir hata oluştu.</div>`;
@@ -458,35 +513,85 @@
             const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.fixture.status.short);
             const hasStarted = !!fixture.fixture.status.elapsed || isFinished;
         
+            // YENİ: Tahmin Pazarı bölümünün HTML'ini oluşturan fonksiyon
+            const renderPredictionMarket = (fixtureId) => {
+                // Maç başlamışsa veya bitmişse tahmin oluşturma formunu gösterme
+                if (hasStarted || isFinished) {
+                    return `
+                        <div class="prediction-section">
+                            <h4>Active Predictions for this Match</h4>
+                            <div class="prediction-list" id="prediction-list-container">
+                                <div class="content-loader">Loading predictions...</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="prediction-section">
+                        <h4>Create New Prediction</h4>
+                        <div class="prediction-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="market-type">Market</label>
+                                    <select id="market-type">
+                                        <option value="TOTAL_GOALS_OVER_2_5">Total Goals - Over 2.5</option>
+                                        <option value="TOTAL_GOALS_UNDER_2_5">Total Goals - Under 2.5</option>
+                                        <option value="BOTH_TEAMS_TO_SCORE_YES">Both Teams to Score - Yes</option>
+                                        <option value="BOTH_TEAMS_TO_SCORE_NO">Both Teams to Score - No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="entry-fee">Entry Fee (JAG)</label>
+                                    <input type="number" id="entry-fee" value="10" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="max-participants">Max Users</label>
+                                    <input type="number" id="max-participants" value="20" min="2">
+                                </div>
+                                <div class="form-group">
+                                     <button class="btn-create-prediction" onclick="createPrediction(${fixtureId})">Create</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="prediction-status" style="display:none;"></div>
+
+                        <div class="prediction-section">
+                            <h4>Active Predictions for this Match</h4>
+                            <div class="prediction-list" id="prediction-list-container">
+                                <div class="content-loader">Loading predictions...</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            };
+
             let tabsHTML = '';
             let contentHTML = '';
-            let firstTabSet = false;
-        
-            const addTab = (id, label) => {
-                tabsHTML += `<button class="modal-tab-button ${!firstTabSet ? 'active' : ''}" data-tab="${id}">${label}</button>`;
-                firstTabSet = true;
+            
+            const addTab = (id, label, content, isActive = false) => {
+                tabsHTML += `<button class="modal-tab-button ${isActive ? 'active' : ''}" data-tab="${id}">${label}</button>`;
+                contentHTML += `<div id="${id}-content" class="modal-tab-content ${isActive ? 'active' : ''}">${content}</div>`;
             };
-        
-            const addContent = (id, content) => {
-                contentHTML += `<div id="${id}-content" class="modal-tab-content ${contentHTML === '' ? 'active' : ''}">${content}</div>`;
-            };
-        
+
+            let firstTab = true;
+            
             if (hasStarted || isFinished) {
-                addTab('summary', 'Özet');
-                addContent('summary', renderSummary(fixture.events, fixture.teams));
+                addTab('summary', 'Summary', renderSummary(fixture.events, fixture.teams), firstTab);
+                firstTab = false;
             }
-        
             if (isFinished) {
-                addTab('stats', 'İstatistik');
-                addContent('stats', renderStats(fixture.statistics, fixture.teams));
+                addTab('stats', 'Statistics', renderStats(fixture.statistics, fixture.teams), firstTab && !hasStarted);
+                firstTab = false;
             }
-        
-            addTab('lineups', 'Kadrolar');
-            addContent('lineups', renderLineups(fixture.lineups, fixture.fixture.id));
-        
-            addTab('h2h', 'H2H');
-            addContent('h2h', renderH2H(h2h));
-        
+            addTab('lineups', 'Lineups', renderLineups(fixture.lineups, fixture.fixture.id), firstTab);
+            firstTab = false;
+            addTab('h2h', 'H2H', renderH2H(h2h), firstTab);
+            firstTab = false;
+            
+            addTab('predictions', 'Prediction Market', renderPredictionMarket(fixture.fixture.id), firstTab);
+
             modalBody.innerHTML = `<div class="modal-tabs">${tabsHTML}</div>${contentHTML}`;
             
             modalBody.querySelectorAll('.modal-tab-button').forEach(button => {
@@ -494,9 +599,19 @@
                     const tabId = e.target.dataset.tab + '-content';
                     modalBody.querySelectorAll('.modal-tab-content, .modal-tab-button').forEach(el => el.classList.remove('active'));
                     e.target.classList.add('active');
-                    modalBody.querySelector('#' + tabId).classList.add('active');
+                    const contentEl = modalBody.querySelector('#' + tabId);
+                    if (contentEl) contentEl.classList.add('active');
+
+                    if (e.target.dataset.tab === 'predictions') {
+                        loadPredictionsForFixture(fixture.fixture.id);
+                    }
                 });
             });
+
+            const activeTabButton = modalBody.querySelector('.modal-tab-button.active');
+            if (activeTabButton && activeTabButton.dataset.tab === 'predictions') {
+                loadPredictionsForFixture(fixture.fixture.id);
+            }
         };
 
         const getEventIcon = (type, detail) => {
@@ -571,7 +686,7 @@
                         <h5>İlk 11</h5>
                         ${awayLineup.startXI.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
                         <h5 style="margin-top:1rem;">Yedekler</h5>
-                        ${awayLineup.substitutes.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
+                        ${homeLineup.substitutes.map(p => `<div class="player-row">${p.player.number || '-'}. ${p.player.name}</div>`).join('')}
                     </div>
                 </div>`;
         };
@@ -864,15 +979,72 @@
             }
         };
 
-        // --- PAGE INITIALIZATION ---
-        const openTab = (event) => {
-            const tabName = event.currentTarget.dataset.tab;
-            document.querySelectorAll('.tab-content, .tab-button').forEach(el => el.classList.remove('active'));
-            document.getElementById(tabName).classList.add('active');
-            event.currentTarget.classList.add('active');
-            if (tabName === 'favorites-tab') renderFavoriteMatches();
+        // ===================================================================
+        //              WEB3 & SMART CONTRACT INTERACTION
+        // ===================================================================
+
+        const jagWinSoccerAddress = "0x09fd5199F428dF0ac985aaDEb404DD3d12Ab73b3";
+        const jagWinSoccerABI = [
+            "function createPrediction(uint256 _entryFee, uint256 _maxParticipants, uint256 _votingDuration)",
+            "function joinPrediction(uint256 _predictionId)",
+            "event PredictionCreated(uint256 indexed predictionId, address indexed creator, uint256 entryFee, uint256 maxParticipants)",
+        ];
+
+        const getSigner = () => {
+            if (!window.ethereum) throw new Error("No crypto wallet found. Please install it.");
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            return provider.getSigner();
         };
 
+        const showPredictionStatus = (message, isError = false) => {
+            const statusDiv = document.getElementById('prediction-status');
+            statusDiv.textContent = message;
+            statusDiv.style.color = isError ? 'var(--danger-color)' : '#4CAF50';
+            statusDiv.style.display = 'block';
+        };
+
+        async function createPrediction(fixtureId) {
+            if (!currentUser || !currentUser.address) {
+                showFavoriteAlert("Please log in with your wallet to create a prediction.");
+                return;
+            }
+
+            const entryFee = document.getElementById('entry-fee').value;
+            const maxParticipants = document.getElementById('max-participants').value;
+            // Oylama süresini şimdilik sabit 3 gün olarak ayarlayalım (saniye cinsinden)
+            const votingDuration = 3 * 24 * 60 * 60; 
+
+            showPredictionStatus("Preparing transaction...", false);
+
+            try {
+                const signer = getSigner();
+                const contract = new ethers.Contract(jagWinSoccerAddress, jagWinSoccerABI, signer);
+
+                const entryFeeWei = ethers.utils.parseUnits(entryFee, 18);
+
+                const tx = await contract.createPrediction(entryFeeWei, maxParticipants, votingDuration);
+                
+                showPredictionStatus("Waiting for transaction confirmation...", false);
+                await tx.wait();
+
+                showPredictionStatus("Prediction created successfully! ✅", false);
+                loadPredictionsForFixture(fixtureId);
+
+            } catch (error) {
+                console.error("Create Prediction Error:", error);
+                showPredictionStatus(`Error: ${error.reason || error.message}`, true);
+            }
+        }
+
+        async function loadPredictionsForFixture(fixtureId) {
+             document.getElementById('prediction-list-container').innerHTML = `<div class="content-loader" style="color:var(--text-muted-color);">This feature is coming soon!</div>`;
+        }
+
+        async function joinPrediction(predictionId, entryFee) {
+            // Bu fonksiyonu bir sonraki adımda dolduracağız.
+        }
+
+        // --- PAGE INITIALIZATION ---
         const initializePage = async () => {
             if ('serviceWorker' in navigator) {
                 try { await navigator.serviceWorker.register('/service-worker.js'); } catch(err) { console.error('Service Worker kaydı başarısız:', err); }
