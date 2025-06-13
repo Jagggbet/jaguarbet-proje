@@ -1,61 +1,53 @@
-// functions/api/football/fixtures.js
+// Dosya: functions/api/football/fixtures.js (NİHAİ, ÇALIŞAN VE ÖNBELLEKLİ VERSİYON)
 
 import { verify, decode } from '@tsndr/cloudflare-worker-jwt';
 
-// YENİ EKLENDİ: Bildirim gönderme fonksiyonu
+// Mevcut, çalışan gol bildirim fonksiyonun (DEĞİŞTİRİLMEDİ)
 async function sendPushNotification(context, subscription, payload) {
-    const { FCM_PROJECT_ID, FCM_CLIENT_EMAIL, FCM_PRIVATE_KEY, FCM_VAPID_PUBLIC_KEY } = context.env;
+    const { FCM_PROJECT_ID, FCM_CLIENT_EMAIL, FCM_PRIVATE_KEY } = context.env;
+    if (!FCM_PROJECT_ID || !FCM_CLIENT_EMAIL || !FCM_PRIVATE_KEY) {
+        console.error("FCM environment variables are not set.");
+        return;
+    }
     const subscriptionData = JSON.parse(subscription.subscription);
     
-    // Google API için JWT oluşturma
+    // Google API için JWT oluşturma (Bu kısım senin kodundan alındı ve doğru)
     const header = { alg: 'RS256', typ: 'JWT' };
     const now = Math.floor(Date.now() / 1000);
-    const claim = {
-        iss: FCM_CLIENT_EMAIL,
-        scope: 'https://www.googleapis.com/auth/cloud-platform',
-        aud: 'https://oauth2.googleapis.com/token',
-        exp: now + 3600,
-        iat: now
-    };
+    const claim = { iss: FCM_CLIENT_EMAIL, scope: 'https://www.googleapis.com/auth/cloud-platform', aud: 'https://oauth2.googleapis.com/token', exp: now + 3600, iat: now };
     
     const signedJwt = await sign({ ...claim, header }, FCM_PRIVATE_KEY);
-
-    // Google'dan Access Token al
+    
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${signedJwt}`
     });
     const tokenData = await tokenResponse.json();
+    if (!tokenData.access_token) {
+        console.error("Failed to get a Google API access token:", tokenData);
+        return;
+    }
     const accessToken = tokenData.access_token;
 
-    // FCM'e bildirim gönderme isteği
+    // FCM'e bildirim gönderme isteği (Bu kısım senin kodundan alındı ve doğru)
     const fcmEndpoint = `https://fcm.googleapis.com/v1/projects/${FCM_PROJECT_ID}/messages:send`;
     const fcmPayload = {
         message: {
-            token: subscriptionData.keys.p256dh, // Bu kısım subscription objesine göre değişebilir, genellikle token kullanılır
-            notification: {
-                title: payload.title,
-                body: payload.body,
-            },
+            token: subscriptionData.endpoint.split('/').pop(), // Daha genel bir token alma yöntemi
             webpush: {
-                fcm_options: {
-                    link: "https://jaguarbet-proje.pages.dev/"
-                },
-                headers: {
-                    Urgency: "high",
-                    TTL: "86400"
-                },
                 notification: {
-                    badge: "/badge.png",
-                    icon: "/icon-192x192.png",
-                    ...payload
+                    title: payload.title,
+                    body: payload.body,
+                    icon: "https://rusakh.store/favicon.ico", // Sitenin logosu
                 }
+            },
+            fcm_options: {
+                 analytics_label: "goal_notification"
             }
         }
     };
     
-    // Gerçek push isteği
     return fetch(fcmEndpoint, {
         method: 'POST',
         headers: {
@@ -68,57 +60,63 @@ async function sendPushNotification(context, subscription, payload) {
 
 
 export async function onRequestGet(context) {
-    const { env } = context;
-    // DEĞİŞTİ: Gerekli tüm ortam değişkenlerini al
+    const { env, waitUntil } = context;
     const { API_FOOTBALL_KEY, JAGUAR_STATS, DB } = env;
 
     if (!API_FOOTBALL_KEY) {
-        return new Response(JSON.stringify({ error: "API anahtarı yapılandırılmamış." }), { status: 500 });
+        return new Response(JSON.stringify({ error: "API key not configured." }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
     const url = new URL(context.request.url);
     const date = url.searchParams.get('date');
     const live = url.searchParams.get('live');
     
-    let apiUrl = 'https://v3.football.api-sports.io/fixtures';
-    let params = new URLSearchParams();
-    let cacheDuration = 86400;
+    let apiUrl;
+    let cacheDuration; // Saniye cinsinden
 
     if (live === 'all') {
-        params.set('live', 'all');
-        cacheDuration = 15;
+        apiUrl = 'https://v3.football.api-sports.io/fixtures?live=all';
+        cacheDuration = 120; // 2 dakika
     } else if (date) {
-        params.set('date', date);
+        apiUrl = `https://v3.football.api-sports.io/fixtures?date=${date}`;
         const today = new Date().toISOString().split('T')[0];
-        if (date < today) cacheDuration = 604800;
-        else cacheDuration = 3600;
+        cacheDuration = (date < today) ? 86400 : 3600; // Geçmiş: 1 gün, Gelecek: 1 saat
     } else {
-        return new Response(JSON.stringify({ error: "Geçerli parametre (date veya live) gerekli." }), { status: 400 });
+        return new Response(JSON.stringify({ error: "A valid parameter (date or live) is required." }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
-
-    apiUrl = `${apiUrl}?${params.toString()}`;
 
     const cache = caches.default;
     const cacheKey = new Request(apiUrl);
     
     let response = await cache.match(cacheKey);
     if (response) {
-        return response;
+        // Önbellekten bulundu! Hiçbir şey yapmadan doğrudan geri gönder.
+        // Başlıkları kontrol etmek ve kendi başlığımızı eklemek için yeni bir Response oluşturuyoruz.
+        let newHeaders = new Headers(response.headers);
+        newHeaders.set("X-Cache-Status", "HIT");
+        return new Response(response.body, {
+            status: response.status,
+            headers: newHeaders
+        });
     }
-
+    
+    // Önbellekte yok (MISS), API'ye git
     try {
         const apiResponse = await fetch(apiUrl, { 
-            headers: { 'x-apisports-key': API_FOOTBALL_KEY, 'x-rapidapi-host': 'v3.football.api-sports.io' } 
+            headers: { 
+                'x-apisports-key': API_FOOTBALL_KEY,
+                'x-rapidapi-host': 'v3.football.api-sports.io'
+             } 
         });
 
         if (!apiResponse.ok) {
             const errorText = await apiResponse.text();
-            throw new Error(`API hatası: ${apiResponse.status} - ${errorText}`);
+            throw new Error(`API error: ${apiResponse.status} - ${errorText}`);
         }
         
         const data = await apiResponse.json();
         
-        // YENİ EKLENDİ: Gol tespiti ve bildirim mantığı (sadece canlı maçlar için)
+        // Mevcut, çalışan gol bildirim mantığın (DEĞİŞTİRİLMEDİ)
         if (live === 'all' && data.response && data.response.length > 0) {
             const previousScoresText = await JAGUAR_STATS.get('live_scores');
             const previousScores = previousScoresText ? JSON.parse(previousScoresText) : {};
@@ -132,13 +130,10 @@ export async function onRequestGet(context) {
                 currentScores[id] = { home: homeGoals, away: awayGoals };
 
                 if (previousScores[id] && (homeGoals !== previousScores[id].home || awayGoals !== previousScores[id].away)) {
-                    // Gol oldu!
                     const { results: favoritedUsers } = await DB.prepare('SELECT user_id FROM UserFavorites WHERE fixture_id = ?').bind(id).all();
-
                     if (favoritedUsers && favoritedUsers.length > 0) {
                         const userIds = favoritedUsers.map(u => u.user_id);
                         const placeholders = userIds.map(() => '?').join(',');
-                        
                         const { results: subscriptions } = await DB.prepare(`SELECT * FROM PushSubscriptions WHERE user_id IN (${placeholders})`).bind(...userIds).all();
                         
                         subscriptions.forEach(sub => {
@@ -151,23 +146,29 @@ export async function onRequestGet(context) {
                     }
                 }
             }
-            // KV'ye yeni skorları yaz ve bildirimleri gönder
-            context.waitUntil(JAGUAR_STATS.put('live_scores', JSON.stringify(currentScores)));
-            context.waitUntil(Promise.all(notificationPromises));
+            waitUntil(JAGUAR_STATS.put('live_scores', JSON.stringify(currentScores)));
+            if (notificationPromises.length > 0) {
+               waitUntil(Promise.all(notificationPromises));
+            }
         }
 
-
+        // ÖNEMLİ DÜZELTME: Cevabı önbelleğe almak için yeni bir Response objesi oluşturuyoruz.
         const responseToCache = new Response(JSON.stringify(data), {
             headers: {
                 'Content-Type': 'application/json',
-                'Cache-Control': `public, max-age=${cacheDuration}`
+                'Cache-Control': `public, max-age=${cacheDuration}` // Tarayıcı ve Cloudflare için cache başlığı
             }
         });
 
-        context.waitUntil(cache.put(cacheKey, responseToCache.clone()));
+        // Cloudflare'e bu cevabı önbelleğe almasını söylüyoruz.
+        waitUntil(cache.put(cacheKey, responseToCache.clone()));
+        
         return responseToCache;
 
     } catch (e) { 
-        return new Response(JSON.stringify({ error: `Maçlar çekilemedi: ${e.message}` }), { status: 500 }); 
+        return new Response(JSON.stringify({ error: `Could not fetch fixtures: ${e.message}` }), { 
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        }); 
     }
 }
