@@ -126,6 +126,7 @@
         .prediction-list .prediction-meta { display: flex; justify-content: space-between; align-items: center; }
         .prediction-list .prediction-meta span { font-size: 0.9rem; }
         .btn-join-prediction { background-color: var(--primary-color); padding: 8px 15px; font-size: 0.9rem; }
+        .btn-join-prediction:disabled { background-color: #555; cursor: not-allowed; }
         #prediction-status { margin-top: 1rem; text-align: center; padding: 10px; border-radius: 5px; display: none; }
     </style>
 </head>
@@ -266,6 +267,7 @@
     <script src="analytics.js"></script>
     
     <script>
+        // MEVCUT KODUN BAŞLANGICI
         const API_BASE_AUTH = '/api/auth';
         const API_BASE_FOOTBALL = '/api/football';
         const API_BASE_NOTIFICATIONS = '/api/notifications';
@@ -361,7 +363,7 @@
                 'live': 'No live matches right now.',
                 'scheduled': 'No scheduled matches found for the selected date.',
                 'finished': 'No finished matches found for the selected date.',
-                'favorites': 'No favorite matches found or data is not yet loaded.'
+                'favorites': 'You have no favorite matches yet.'
             };
             if (!matches || matches.length === 0) {
                 displayMessage(container.id, messageMap[type] || 'No data found.');
@@ -457,6 +459,7 @@
             }
         };
 
+        // GÜNCELLENMİŞ renderModalContent FONKSİYONU
         const renderModalContent = (fixture, h2h) => {
             const isFinished = ['FT', 'AET', 'PEN'].includes(fixture.fixture.status.short);
             const hasStarted = !!fixture.fixture.status.elapsed || isFinished;
@@ -645,33 +648,224 @@
         
         // --- AUTH, FAVORITES, NOTIFICATIONS & STANDINGS FUNCTIONS ---
         const loginWithGoogle = () => { window.location.href = `${API_BASE_AUTH}/google`; };
-        const loginWithWallet = async () => { /* ... mevcut kod ... */ };
-        const logout = () => { /* ... mevcut kod ... */ };
-        const checkForLoggedInUser = async () => { /* ... mevcut kod ... */ };
-        const updateUI = () => { /* ... mevcut kod ... */ };
-        const toggleProfileMenu = () => { /* ... mevcut kod ... */ };
-        const loadUserFavorites = async () => { /* ... mevcut kod ... */ };
-        const saveFavorites = async () => { /* ... mevcut kod ... */ };
-        const toggleFavorite = (fixtureIdStr, event) => { /* ... mevcut kod ... */ };
-        const showFavoriteAlert = (msg) => { /* ... mevcut kod ... */ };
-        const updateAllFavoriteIcons = () => { /* ... mevcut kod ... */ };
-        const handleNotificationSwitch = async () => { /* ... mevcut kod ... */ };
-        const updateNotificationSwitch = async () => { /* ... mevcut kod ... */ };
-        const subscribeUserToPush = async () => { /* ... mevcut kod ... */ };
-        const unsubscribeUserFromPush = async () => { /* ... mevcut kod ... */ };
+        const loginWithWallet = async () => {
+            const msg = document.getElementById('login-message');
+            msg.textContent = '';
+            try {
+                if (typeof window.ethereum === 'undefined') throw new Error('Please install a wallet like MetaMask.');
+                showLoading();
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                const signer = provider.getSigner();
+                const address = await signer.getAddress();
+                const { nonce } = await fetchDataFromBackend(`${API_BASE_AUTH}/nonce`);
+                const message = `Log in to JaguarBet. Nonce: ${nonce}`;
+                const signature = await signer.signMessage(message);
+                const { token } = await fetchDataFromBackend(`${API_BASE_AUTH}/web3-verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, signature, address }),
+                });
+                localStorage.setItem('user_token', token);
+                await checkForLoggedInUser();
+            } catch (error) {
+                msg.textContent = `Error: ${error.message}`;
+                msg.style.color = 'var(--danger-color)';
+            } finally {
+                hideLoading();
+            }
+        };
+        const logout = () => {
+            localStorage.removeItem('user_token');
+            currentUser = null;
+            userDbFavorites.clear();
+            updateUI();
+            updateAllFavoriteIcons();
+            renderFavoriteMatches();
+        };
+        const checkForLoggedInUser = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tokenFromUrl = urlParams.get('token');
+            if (tokenFromUrl) {
+                localStorage.setItem('user_token', tokenFromUrl);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            const storedToken = localStorage.getItem('user_token');
+            if (storedToken) {
+                const userData = parseJwt(storedToken);
+                if (userData && userData.exp * 1000 > Date.now()) {
+                    currentUser = userData;
+                } else {
+                    logout();
+                }
+            }
+            updateUI();
+            if (currentUser) {
+                await loadUserFavorites();
+                const guestFavorites = getGuestFavorites();
+                if (guestFavorites.size > 0) {
+                    const mergedFavorites = new Set([...guestFavorites, ...userDbFavorites]);
+                    if (mergedFavorites.size > userDbFavorites.size) {
+                        userDbFavorites = new Set(Array.from(mergedFavorites));
+                        await saveFavorites();
+                    }
+                    localStorage.removeItem('guest_favorites');
+                }
+                await updateNotificationSwitch();
+            }
+            updateAllFavoriteIcons();
+            renderFavoriteMatches();
+        };
+        const updateUI = () => {
+            const authSection = document.getElementById('auth-section');
+            const profileSection = document.getElementById('profile-section');
+            if (currentUser) {
+                authSection.style.display = 'none';
+                profileSection.style.display = 'block';
+                const profileName = currentUser.name || (currentUser.address ? 'Wallet User' : 'User');
+                document.getElementById('profile-name').textContent = profileName.split(' ')[0];
+                document.getElementById('menu-user-name').textContent = profileName;
+                document.getElementById('menu-user-email').textContent = currentUser.email || 'No email provided';
+                const walletContainer = document.getElementById('menu-wallet-address-container');
+                if (currentUser.address) {
+                    walletContainer.style.display = 'flex';
+                    document.getElementById('menu-wallet-address').textContent = `${currentUser.address.slice(0, 6)}...${currentUser.address.slice(-4)}`;
+                } else {
+                    walletContainer.style.display = 'none';
+                }
+            } else {
+                authSection.style.display = 'block';
+                profileSection.style.display = 'none';
+            }
+        };
+        const toggleProfileMenu = () => {
+            const menu = document.getElementById('profile-menu');
+            const button = document.getElementById('profile-button');
+            const isVisible = menu.style.display === 'block';
+            menu.style.display = isVisible ? 'none' : 'block';
+            button.classList.toggle('open', !isVisible);
+        };
+        const loadUserFavorites = async () => {
+            const token = localStorage.getItem('user_token');
+            if (!token) return;
+            try {
+                const favs = await fetchDataFromBackend(`${API_BASE_FOOTBALL}/get-favorites`, { headers: { 'Authorization': `Bearer ${token}` } });
+                userDbFavorites = new Set(favs.map(Number));
+            } catch (error) { console.error('Error loading favorites:', error); }
+        };
+        const saveFavorites = async () => {
+            if (!currentUser) return;
+            const token = localStorage.getItem('user_token');
+            try {
+                await fetchDataFromBackend(`${API_BASE_FOOTBALL}/set-favorites`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(Array.from(userDbFavorites))
+                });
+            } catch (error) { console.error('Error saving favorites:', error); }
+        };
+        const toggleFavorite = (fixtureIdStr, event) => {
+            event.stopPropagation();
+            const fixtureId = parseInt(fixtureIdStr, 10);
+            const icon = event.target;
+            const favorites = getCurrentFavorites();
+            if (favorites.has(fixtureId)) {
+                favorites.delete(fixtureId);
+            } else {
+                favorites.add(fixtureId);
+                icon.classList.add('favorite-animate');
+                setTimeout(() => icon.classList.remove('favorite-animate'), 300);
+            }
+            if (currentUser) saveFavorites();
+            else saveGuestFavorites(favorites);
+            updateAllFavoriteIcons();
+            renderFavoriteMatches();
+        };
+        const showFavoriteAlert = (msg) => {
+            const alertDiv = document.getElementById('favorite-alert');
+            alertDiv.textContent = msg;
+            alertDiv.style.display = 'block';
+            setTimeout(() => alertDiv.style.opacity = 1, 10);
+            setTimeout(() => {
+                alertDiv.style.opacity = 0;
+                setTimeout(() => alertDiv.style.display = 'none', 300);
+            }, 2000);
+        };
+        const updateAllFavoriteIcons = () => {
+            const favorites = getCurrentFavorites();
+            document.querySelectorAll('.favorite-toggle').forEach(icon => {
+                const fixtureId = parseInt(icon.dataset.fixtureId, 10);
+                icon.classList.toggle('is-favorite', favorites.has(fixtureId));
+            });
+        };
+        const handleNotificationSwitch = async () => {
+            const isChecked = document.getElementById('notification-switch').checked;
+            try {
+                if (isChecked) await subscribeUserToPush();
+                else await unsubscribeUserFromPush();
+            } catch (error) {
+                console.error('Notification switch error:', error);
+                document.getElementById('notification-switch').checked = !isChecked;
+                showFavoriteAlert('Could not change notification settings.');
+            }
+        };
+        const updateNotificationSwitch = async () => {
+            const item = document.getElementById('notification-item');
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !FCM_VAPID_PUBLIC_KEY) {
+                item.style.display = 'none';
+                return;
+            }
+            item.style.display = 'flex';
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                document.getElementById('notification-switch').checked = subscription !== null;
+            } catch (e) {
+                console.error("Service worker not ready, could not check notification status.");
+                item.style.display = 'none';
+            }
+        };
+        const subscribeUserToPush = async () => {
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') throw new Error('Notification permission not granted.');
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(FCM_VAPID_PUBLIC_KEY),
+            });
+            await fetchDataFromBackend(`${API_BASE_NOTIFICATIONS}/subscribe`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('user_token')}` },
+                body: JSON.stringify(subscription),
+            });
+            showFavoriteAlert('Notifications enabled!');
+        };
+        const unsubscribeUserFromPush = async () => {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (subscription) {
+                await fetchDataFromBackend(`${API_BASE_NOTIFICATIONS}/unsubscribe`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('user_token')}` },
+                    body: JSON.stringify({ endpoint: subscription.endpoint }),
+                });
+                await subscription.unsubscribe();
+                showFavoriteAlert('Notifications disabled.');
+            }
+        };
         const loadLeagues = async () => { /* ... mevcut kod ... */ };
         const loadSeasons = async () => { /* ... mevcut kod ... */ };
         const fetchStandings = async () => { /* ... mevcut kod ... */ };
 
         // ===================================================================
-        //              WEB3 & SMART CONTRACT INTERACTION (GÜNCELLENDİ)
+        //              YENİ VE GÜNCELLENMİŞ WEB3 BÖLÜMÜ
         // ===================================================================
 
         const jagTokenAddress = "0x745ff1E3699f1273FF63239dC0Ea41781F6330E1";
         const jagWinSoccerAddress = "0x09fd5199F428dF0ac985aaDEb404DD3d12Ab73b3";
         
-        const jagTokenABI = [ "function approve(address spender, uint256 amount) public returns (bool)", "function allowance(address owner, address spender) public view returns (uint256)" ];
-        const jagWinSoccerABI = [ "function createPrediction(uint256 _entryFee, uint256 _maxParticipants, uint256 _votingDuration) returns (uint256)", "function joinPrediction(uint256 _predictionId)", "function predictions(uint256) view returns (address creator, uint256 entryFee, uint256 maxParticipants, uint256 joinedParticipants, uint256 votesFor, uint256 votesAgainst, uint256 finalizeTime, uint8 result, uint8 state)", "event PredictionCreated(uint256 indexed predictionId, address indexed creator, uint256 entryFee, uint256 maxParticipants)" ];
+        const jagTokenABI = [ "function approve(address spender, uint256 amount) returns (bool)", "function allowance(address owner, address spender) view returns (uint256)" ];
+        const jagWinSoccerABI = [ "function createPrediction(uint256, uint256, uint256)", "function joinPrediction(uint256)", "function predictions(uint256) view returns (address, uint256, uint256, uint256, uint, uint, uint, uint8, uint8)", "event PredictionCreated(uint256 indexed predictionId, address indexed creator)" ];
 
         const getSigner = async () => {
             if (!window.ethereum) throw new Error("No crypto wallet found. Please install it.");
@@ -709,23 +903,27 @@
             showPredictionStatus("Preparing transaction...", false);
 
             try {
-                const signer = getSigner();
+                const signer = await getSigner();
                 const contract = new ethers.Contract(jagWinSoccerAddress, jagWinSoccerABI, signer);
                 const entryFeeWei = ethers.utils.parseUnits(entryFee, 18);
                 
                 let predictionId;
-                contract.on("PredictionCreated", (id, creator, fee, max) => {
+                const listener = (id, creator) => {
                     if (creator.toLowerCase() === currentUser.address.toLowerCase()) {
                         predictionId = id.toNumber();
+                        contract.off("PredictionCreated", listener); // Listener'ı kaldır
                     }
-                });
+                };
+                contract.on("PredictionCreated", listener);
 
                 const tx = await contract.createPrediction(entryFeeWei, maxParticipants, votingDuration);
                 showPredictionStatus("Waiting for transaction confirmation...", false);
                 await tx.wait();
-
-                // Wait a moment for the event to be processed
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Event'in yakalanması için kısa bir bekleme süresi
+                for(let i=0; i < 5 && predictionId === undefined; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
                 
                 if (predictionId !== undefined) {
                      await fetchDataFromBackend(`${API_BASE_PREDICTIONS}/create`, {
@@ -736,7 +934,7 @@
                     showPredictionStatus("Prediction created successfully! ✅", false);
                     loadPredictionsForFixture(fixtureId);
                 } else {
-                   throw new Error("Could not retrieve prediction ID from event.");
+                   throw new Error("Could not retrieve prediction ID from the event. Please check the transaction on PolygonScan.");
                 }
 
             } catch (error) {
@@ -789,32 +987,34 @@
             }
         }
 
-        async function joinPrediction(predictionId, entryFee) {
+        async function joinPrediction(predictionId, entryFeeString) {
             if (!currentUser || !currentUser.address) { return showFavoriteAlert("Please log in with your wallet to join a prediction."); }
             
             showLoading();
             try {
                 const signer = await getSigner();
                 const userAddress = await signer.getAddress();
+                const entryFee = ethers.BigNumber.from(entryFeeString);
 
                 const tokenContract = new ethers.Contract(jagTokenAddress, jagTokenABI, signer);
                 const winContract = new ethers.Contract(jagWinSoccerAddress, jagWinSoccerABI, signer);
 
-                // 1. Check allowance
+                showFavoriteAlert("Checking token allowance...");
                 const allowance = await tokenContract.allowance(userAddress, jagWinSoccerAddress);
                 if (allowance.lt(entryFee)) {
-                    showFavoriteAlert("Approving token spend...");
-                    const approveTx = await tokenContract.approve(jagWinSoccerAddress, ethers.constants.MaxUint256);
+                    showFavoriteAlert("Approval needed. Please confirm in your wallet...");
+                    const approveTx = await tokenContract.approve(jagWinSoccerAddress, entryFee); // Sadece gerekli miktar için izin iste
                     await approveTx.wait();
                     showFavoriteAlert("Approval successful! Now joining...");
                 }
 
-                // 2. Join prediction
+                showFavoriteAlert("Joining prediction, please confirm...");
                 const joinTx = await winContract.joinPrediction(predictionId);
                 await joinTx.wait();
                 
                 showFavoriteAlert("Successfully joined the prediction! 🎉");
-                const fixtureId = Object.values(allMatchesData).find(m => m.predictions?.some(p => p.id === predictionId))?.fixture.id;
+                // Tahmin listesini yenile
+                const fixtureId = modalBody.querySelector('.modal-tab-button[data-tab="predictions"]')?.dataset.fixtureId;
                 if(fixtureId) loadPredictionsForFixture(fixtureId);
 
             } catch(error) {
@@ -826,8 +1026,53 @@
         }
 
         // --- PAGE INITIALIZATION ---
-        const openTab = (event) => { /* ... mevcut kod ... */ };
-        const initializePage = async () => { /* ... mevcut kod ... */ };
+        const openTab = (event) => {
+            const tabName = event.currentTarget.dataset.tab;
+            document.querySelectorAll('.tab-content, .tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+            if (tabName === 'favorites-tab') renderFavoriteMatches();
+        };
+
+        const initializePage = async () => {
+            if ('serviceWorker' in navigator) {
+                try { await navigator.serviceWorker.register('/service-worker.js'); } catch(err) { console.error('Service Worker registration failed:', err); }
+            }
+            
+            document.getElementById('google-login-btn').addEventListener('click', loginWithGoogle);
+            document.getElementById('wallet-login-btn').addEventListener('click', loginWithWallet);
+            document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+            document.getElementById('profile-button').addEventListener('click', toggleProfileMenu);
+            document.querySelectorAll('.tab-button').forEach(button => button.addEventListener('click', openTab));
+            document.getElementById('notification-switch').addEventListener('change', handleNotificationSwitch);
+            document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+            modal.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+            window.addEventListener('click', (event) => {
+                if (!event.target.closest('#profile-section')) {
+                    const menu = document.getElementById('profile-menu');
+                    if (menu && menu.style.display === 'block') toggleProfileMenu();
+                }
+            });
+
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            document.getElementById('scheduled-date-select').value = today.toISOString().split('T')[0];
+            document.getElementById('finished-date-select').value = yesterday.toISOString().split('T')[0];
+            
+            try {
+                const config = await fetchDataFromBackend(API_BASE_CONFIG);
+                FCM_VAPID_PUBLIC_KEY = config.vapidPublicKey;
+            } catch(e) { console.error('Could not load configuration', e); }
+
+            await checkForLoggedInUser();
+            await fetchLiveMatches();
+            await loadLeagues();
+            await loadSeasons();
+            
+            liveMatchIntervalId = setInterval(() => fetchLiveMatches(true), 15000);
+        };
+        
         document.addEventListener('DOMContentLoaded', initializePage);
     </script>
 </body>
